@@ -58,10 +58,11 @@ class EmployeeListView(ListView, HtmxTemplateView):
     queryset = AuthenticatorEmployee.objects.all()
     template_name = "terminusgps_authenticator/employees/list.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_list.html"
+    ordering = "pk"
     paginate_by = 25
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object_list = self.get_queryset()
+        self.object_list = self.get_queryset().order_by(self.get_ordering())
         return super().get_context_data(**kwargs)
 
 

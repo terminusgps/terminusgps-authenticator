@@ -6,3 +6,5 @@ from .employees import (
     EmployeeBatchCreateView,
     EmployeeListView,
 )
+from .auth import LoginView, LogoutView
+from .generic import LandingView, SettingsView

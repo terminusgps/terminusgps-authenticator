@@ -1,0 +1,7 @@
+<div class="{{ class }}">
+    <div class="flex flex-col gap-4">
+        <h2 class="text-xl text-terminus-red-800">Employees</h2>
+        <div class="relative overflow-x-auto" hx-target="this" hx-swap="outerHTML" hx-trigger="load" hx-get="{% url 'list employees' %}"></div>
+    </div>
+    <div>Logs</div>
+</div>
