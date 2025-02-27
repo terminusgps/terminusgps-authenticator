@@ -94,10 +94,11 @@ class Command(BaseCommand):
 
         """
         dependencies: list[str] = []
+        if not os.path.isfile("package.json"):
+            return dependencies
 
-        if os.path.isfile("package.json"):
-            with open("package.json", "r") as file:
-                dependencies.extend(json.load(file).get("devDependencies").keys())
+        with open("package.json", "r") as file:
+            dependencies.extend(json.load(file).get("devDependencies").keys())
         return dependencies
 
     def handle(self, *args, **options):
