@@ -1,11 +1,64 @@
 from typing import Any
-from django.core.exceptions import ValidationError
+from uuid import uuid4
 import pandas as pd
+
 from django import forms
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.forms import widgets
 from django.utils.translation import gettext_lazy as _
 
 from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.validators import validate_csv_file
+
+
+class EmployeeCreateForm(forms.Form):
+    email = forms.EmailField(
+        label="Employee Email",
+        validators=[validate_email],
+        widget=widgets.EmailInput(
+            attrs={
+                "class": "p-2 rounded bg-white border border-gray-600",
+                "placeholder": "email@terminusgps.com",
+            }
+        ),
+    )
+    phone = forms.CharField(
+        label="Employee Phone #",
+        widget=widgets.TextInput(
+            attrs={
+                "class": "p-2 rounded bg-white border border-gray-600",
+                "placeholder": "+15555555555",
+            }
+        ),
+    )
+    code = forms.CharField(
+        label="Fingerprint Code",
+        widget=widgets.TextInput(
+            attrs={
+                "class": "p-2 rounded bg-white border border-gray-600",
+                "placeholder": str(uuid4()),
+            }
+        ),
+    )
+
+    def clean(self) -> None | dict[str, Any]:
+        cleaned_data: None | dict[str, Any] = super().clean()
+        if cleaned_data is not None:
+            username = cleaned_data.get("email")
+            all_usernames = [user.username for user in get_user_model().objects.all()]
+
+            if username in all_usernames:
+                self.add_error(
+                    "email",
+                    ValidationError(
+                        _("Whoops! '%(email)s' is already taken."),
+                        code="invalid",
+                        params={"email": username},
+                    ),
+                )
+        return cleaned_data
 
 
 class EmployeeBatchCreateForm(forms.Form):

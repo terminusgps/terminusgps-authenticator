@@ -1,14 +1,13 @@
+from django.contrib.auth import get_user_model
 import pandas as pd
 import pathlib
 
 from typing import Any
-from uuid import uuid4
 
 from django import forms
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import (
-    CreateView,
     DetailView,
     FormView,
     ListView,
@@ -18,42 +17,38 @@ from django.views.generic import (
 
 from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.views.base import HtmxTemplateView
-from terminusgps_authenticator.forms import EmployeeBatchCreateForm
+from terminusgps_authenticator.forms import EmployeeBatchCreateForm, EmployeeCreateForm
 
 
-class EmployeeCreateView(CreateView, HtmxTemplateView):
+class EmployeeCreateView(FormView, HtmxTemplateView):
     extra_context = {"class": "m-8 p-8 bg-gray-300 flex flex-col gap-4 rounded"}
     field_css_class = "p-2 rounded bg-white border border-gray-600"
-    fields = ["user", "code"]
-    model = AuthenticatorEmployee
     partial_template_name = "terminusgps_authenticator/employees/partials/_create.html"
-    placeholders = {"user": "email@terminusgps.com", "code": str(uuid4())}
-    queryset = AuthenticatorEmployee.objects.all()
     template_name = "terminusgps_authenticator/employees/create.html"
+    form_class = EmployeeCreateForm
+    success_url = reverse_lazy("landing")
+    http_method_names = ["get", "post"]
 
-    def get_form(self, form_class=None) -> forms.ModelForm:
-        form = super().get_form(form_class)
-        form.fields["user"].widget.attrs.update(
-            {
-                "class": self.field_css_class,
-                "placeholder": self.placeholders.get("user"),
-            }
-        )
-        form.fields["code"].widget.attrs.update(
-            {
-                "class": self.field_css_class,
-                "placeholder": self.placeholders.get("code"),
-                "autofocus": True,
-            }
-        )
-        return form
+    def form_valid(self, form: EmployeeCreateForm) -> HttpResponseRedirect:
+        print(f"{get_user_model().objects.__dir__() = }")
+        username = form.cleaned_data["email"]
+        phone_number = form.cleaned_data["phone"]
+        password = "Terminus#1!"
+        fingerprint_code = form.cleaned_data["code"]
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = None
-        return super().get_context_data(**kwargs)
+        AuthenticatorEmployee.objects.create(
+            user=get_user_model().objects.create_user(
+                username=username,
+                password=password,
+            ),
+            code=fingerprint_code,
+            phone=phone_number,
+        )
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class EmployeeListView(ListView, HtmxTemplateView):
+    http_method_names = ["get"]
     model = AuthenticatorEmployee
     queryset = AuthenticatorEmployee.objects.all()
     template_name = "terminusgps_authenticator/employees/list.html"
@@ -73,6 +68,7 @@ class EmployeeBatchCreateView(FormView, HtmxTemplateView):
     partial_template_name = "terminusgps_authenticator/employees/_create_batch.html"
     success_url = reverse_lazy("list employees")
     template_name = "terminusgps_authenticator/employees/create_batch.html"
+    http_method_names = ["get", "post"]
 
     def form_valid(self, form: EmployeeBatchCreateForm) -> HttpResponse:
         # Open the file as a dataframe and create a bunch of employees
@@ -97,6 +93,8 @@ class EmployeeDetailView(DetailView, HtmxTemplateView):
     partial_template_name = "terminusgps_authenticator/employees/partials/_detail.html"
     queryset = AuthenticatorEmployee.objects.all()
     fields = ["user", "code"]
+    context_object_name = "employee"
+    http_method_names = ["get"]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object = self.get_object()
@@ -109,6 +107,8 @@ class EmployeeUpdateView(UpdateView, HtmxTemplateView):
     partial_template_name = "terminusgps_authenticator/employees/partials/_update.html"
     queryset = AuthenticatorEmployee.objects.all()
     fields = ["user", "code"]
+    context_object_name = "employee"
+    http_method_names = ["get", "post"]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object = self.get_object()
@@ -120,6 +120,8 @@ class EmployeeDeleteView(DeleteView, HtmxTemplateView):
     template_name = "terminusgps_authenticator/employees/delete.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_delete.html"
     queryset = AuthenticatorEmployee.objects.all()
+    context_object_name = "employee"
+    http_method_names = ["get", "post"]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object = self.get_object()

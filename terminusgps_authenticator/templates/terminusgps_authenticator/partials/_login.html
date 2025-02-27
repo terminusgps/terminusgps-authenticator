@@ -2,7 +2,9 @@
     <h2 class="text-xl">{{ title }}</h2>
     {% csrf_token %}
     <div class="flex flex-col gap-2">
-        {{ form.username.label }}
+        <div class="peer-required:font-bold">
+            {{ form.username.label }}
+        </div>
         {{ form.username }}
         {{ form.username.errors }}
     </div>

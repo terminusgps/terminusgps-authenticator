@@ -14,17 +14,17 @@ urlpatterns = [
     ),
     path("employees/list/", views.EmployeeListView.as_view(), name="list employees"),
     path(
-        "employees/<int:pk>.<str:slug>/",
+        "employees/<int:pk>/",
         views.EmployeeDetailView.as_view(),
         name="detail employee",
     ),
     path(
-        "employees/<int:pk>.<str:slug>/update/",
+        "employees/<int:pk>/update/",
         views.EmployeeUpdateView.as_view(),
         name="update employee",
     ),
     path(
-        "employees/<int:pk>.<str:slug>/delete/",
+        "employees/<int:pk>/delete/",
         views.EmployeeDeleteView.as_view(),
         name="delete employee",
     ),

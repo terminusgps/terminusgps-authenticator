@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db import transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -36,11 +37,6 @@ class AuthenticatorEmployee(models.Model):
         """Returns the employee's username."""
         return str(self.user.username)
 
-    def save(self, **kwargs) -> None:
-        if not self.slug:
-            self.slug = slugify(str(self.name))
-        super().save(**kwargs)
-
     @property
     def email(self) -> str:
         """The employee's email, if it was set."""
@@ -65,6 +61,9 @@ class AuthenticatorEmployee(models.Model):
                 f"'fingerprint_code' cannot be longer than 2048 characters, got '{len(fingerprint_code)}'."
             )
         self.code = fingerprint_code
+
+    def get_absolute_url(self) -> str:
+        return reverse("detail employee", kwargs={"pk": self.pk})
 
 
 class AuthenticatorLogItem(models.Model):

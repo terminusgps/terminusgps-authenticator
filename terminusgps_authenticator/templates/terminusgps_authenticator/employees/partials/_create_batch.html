@@ -1,10 +1,15 @@
 <form class="{{ class }}" action="{% url 'create employee batch' %}" method="post" enctype="multipart/form-data">
-    <h2 class="text-xl">Upload an input file</h2>
+    <h2 class="text-2xl font-bold mb-4">Upload an input file</h2>
     {% csrf_token %}
     <div class="flex flex-col gap-4 p-4 rounded bg-gray-100">
-        {{ form.input_file.label }}
+        <div class="font-semibold">
+            {{ form.input_file.label }}
+        </div>
         {{ form.input_file }}
         {{ form.input_file.errors }}
     </div>
-    <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" type="submit" value="Submit">
+    <div class="flex justify-between gap-2">
+        <a href="{% url 'landing' %}" hx-boost="true" class="w-full rounded border border-terminus-black bg-gray-500 p-2 text-white cursor-pointer hover:bg-gray-400 transition-colors duration-300 ease-in-out text-center">Back</a>
+        <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" type="submit" value="Submit">
+    </div>
 </form>

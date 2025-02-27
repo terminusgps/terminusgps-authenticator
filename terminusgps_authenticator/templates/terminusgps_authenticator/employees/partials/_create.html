@@ -1,15 +1,31 @@
 <form class="{{ class }}" action="{% url 'create employee' %}" method="post">
-    <h2 class="text-xl">Create a new employee</h2>
+    <h2 class="text-2xl font-bold mb-4">Create a new employee</h2>
     {% csrf_token %}
-    <div class="flex flex-col gap-4 p-4 rounded bg-gray-100">
-        {{ form.user.label }}
-        {{ form.user }}
-        {{ form.user.errors }}
+    <div class="flex flex-col md:flex-row p-4 rounded bg-gray-100 gap-4">
+        <div class="flex flex-col gap-2">
+            <div class="font-semibold">
+                {{ form.email.label }}
+            </div>
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+        <div class="flex flex-col gap-2">
+            <div class="font-semibold">
+                {{ form.phone.label }}
+            </div>
+            {{ form.phone }}
+            {{ form.email.phone }}
+        </div>
     </div>
     <div class="flex flex-col gap-4 p-4 rounded bg-gray-100">
-        {{ form.code.label }}
+        <div class="font-semibold">
+            {{ form.code.label }}
+        </div>
         {{ form.code }}
         {{ form.code.errors }}
     </div>
-    <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" type="submit" value="Submit">
+    <div class="flex justify-between gap-2">
+        <a href="{% url 'landing' %}" hx-boost="true" class="w-full rounded border border-terminus-black bg-gray-500 p-2 text-white cursor-pointer hover:bg-gray-400 transition-colors duration-300 ease-in-out text-center">Back</a>
+        <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" type="submit" value="Submit">
+    </div>
 </form>

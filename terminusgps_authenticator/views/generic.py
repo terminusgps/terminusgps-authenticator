@@ -9,7 +9,7 @@ class LandingView(HtmxTemplateView, LoginRequiredMixin):
     login_url = reverse_lazy("login")
     raise_exception = False
     permission_denied_message = "Please login and try again."
-    extra_context = {"class": "flex flex-col gap-8 bg-gray-300 rounded m-8 p-8"}
+    extra_context = {"class": "flex flex-col gap-8 bg-stone-100 rounded m-8 p-8"}
 
 
 class SettingsView(HtmxTemplateView, LoginRequiredMixin):
