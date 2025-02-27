@@ -1,0 +1,18 @@
+[project]
+name = "terminusgps-authenticator"
+version = "1.0.0"
+description = "Authenticator app for Terminus GPS"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.1.6",
+    "pandas>=2.2.3",
+]
+
+[dependency-groups]
+dev = [
+    "autoclasstoc>=1.7.0",
+    "django-docs>=0.3.3",
+    "sphinx>=8.2.1",
+    "sphinxawesome-theme>=5.3.2",
+]

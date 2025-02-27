@@ -1,0 +1,17 @@
+.*
+!.gitignore
+db.*
+output/
+package-lock.json
+node_modules/
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv

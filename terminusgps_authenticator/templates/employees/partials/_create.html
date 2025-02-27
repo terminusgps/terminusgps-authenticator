@@ -1,0 +1,15 @@
+<form class="{{ class }}" action="{% url 'create employee' %}" method="post">
+    <h2 class="text-xl">Create a new employee</h2>
+    {% csrf_token %}
+    <div class="flex flex-col gap-4 p-4 rounded bg-gray-100">
+        {{ form.user.label }}
+        {{ form.user }}
+        {{ form.user.errors }}
+    </div>
+    <div class="flex flex-col gap-4 p-4 rounded bg-gray-100">
+        {{ form.code.label }}
+        {{ form.code }}
+        {{ form.code.errors }}
+    </div>
+    <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" type="submit" value="Submit">
+</form>
