@@ -25,8 +25,9 @@ def create_logitem(action: str | None = None) -> Callable:
         def wrapper(self, *args, **kwargs) -> Any:
             result: Any = func(self, *args, **kwargs)
             if action and action.upper() in LogAction._member_names_:
+                log_action = getattr(LogAction, action.upper())
                 AuthenticatorLogItem.objects.create(
-                    employee=self, action=action, datetime=timezone.now()
+                    employee=self, action=log_action, datetime=timezone.now()
                 )
             return result
 

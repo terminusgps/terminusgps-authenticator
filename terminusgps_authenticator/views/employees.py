@@ -65,13 +65,9 @@ class EmployeeBatchCreateView(FormView, HtmxTemplateView):
 
     def form_valid(self, form: EmployeeBatchCreateForm) -> HttpResponse:
         # Open the file as a dataframe and create a bunch of employees
-        filepath: pathlib.Path = pathlib.Path(form.cleaned_data["input_file"].file)
-        df = pd.read_csv(filepath)
-        for _ in range(len(df)):
-            # Create employee on every row
-            print(f"{df.iloc[0] = }")
-            print(f"{df.iloc[1][1] = }")
-            print(f"{df.iloc[0][1] = }")
+        file = form.cleaned_data["input_file"]
+        df: pd.DataFrame = pd.read_csv(file.file)
+        print(f"{df.head() = }")
         return super().form_valid(form=form)
 
     def get_form(self, form_class=None) -> forms.Form:

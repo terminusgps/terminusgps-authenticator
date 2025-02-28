@@ -1,3 +1,6 @@
+from .auth import LoginView, LogoutView
+from .generic import LandingView, SettingsView
+from .logs import LogItemListView, LogItemDetailView
 from .employees import (
     EmployeeCreateView,
     EmployeeDetailView,
@@ -6,6 +9,9 @@ from .employees import (
     EmployeeBatchCreateView,
     EmployeeListView,
 )
-from .auth import LoginView, LogoutView
-from .generic import LandingView, SettingsView
-from .logs import LogItemListView, LogItemDetailView
+from .reports import (
+    ReportCreateView,
+    ReportDetailView,
+    ReportDeleteView,
+    ReportListView,
+)

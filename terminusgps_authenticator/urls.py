@@ -30,4 +30,12 @@ urlpatterns = [
     ),
     path("logs/", views.LogItemListView.as_view(), name="list logitems"),
     path("logs/<int:pk>/", views.LogItemDetailView.as_view(), name="detail logitem"),
+    path("reports/", views.ReportListView.as_view(), name="list reports"),
+    path("reports/new/", views.ReportCreateView.as_view(), name="create report"),
+    path("reports/<int:pk>/", views.ReportDetailView.as_view(), name="detail report"),
+    path(
+        "reports/<int:pk>/delete/",
+        views.ReportDeleteView.as_view(),
+        name="delete report",
+    ),
 ]

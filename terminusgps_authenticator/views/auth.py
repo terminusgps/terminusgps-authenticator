@@ -43,6 +43,9 @@ class LogoutView(LogoutViewBase, HtmxTemplateView):
     http_method_names = ["get", "post"]
     template_name = "terminusgps_authenticator/logout.html"
     partial_template_name = "terminusgps_authenticator/partials/_logout.html"
+    extra_context = {
+        "class": "group m-4 flex cursor-pointer select-none items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm hover:border-terminus-red-300 transition-colors duration-300 ease-in-out"
+    }
 
     def get_success_url(self) -> str:
         return reverse("login")

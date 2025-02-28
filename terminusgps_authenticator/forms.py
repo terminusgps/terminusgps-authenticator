@@ -1,6 +1,5 @@
 from typing import Any
 from uuid import uuid4
-import pandas as pd
 
 from django import forms
 from django.contrib.auth import get_user_model
@@ -10,7 +9,15 @@ from django.forms import widgets
 from django.utils.translation import gettext_lazy as _
 
 from terminusgps_authenticator.models import AuthenticatorEmployee
-from terminusgps_authenticator.validators import validate_csv_file
+from terminusgps_authenticator.validators import validate_spreadsheet_file
+
+
+class EmployeeBatchCreateForm(forms.Form):
+    input_file = forms.FileField(
+        label="Input file",
+        allow_empty_file=False,
+        validators=[validate_spreadsheet_file],
+    )
 
 
 class EmployeeCreateForm(forms.Form):
@@ -58,31 +65,6 @@ class EmployeeCreateForm(forms.Form):
                         params={"email": username},
                     ),
                 )
-        return cleaned_data
-
-
-class EmployeeBatchCreateForm(forms.Form):
-    input_file = forms.FileField(
-        label="Input file", allow_empty_file=False, validators=[validate_csv_file]
-    )
-
-    def clean(self) -> None | dict[str, Any]:
-        cleaned_data: None | dict[str, Any] = super().clean()
-        if cleaned_data is not None:
-            input_file = cleaned_data.get("input_file")
-
-            if input_file is None:
-                self.add_error(
-                    "input_file",
-                    ValidationError(
-                        _("Whoops! No file provided."),
-                        code="invalid",
-                        params={"file": input_file},
-                    ),
-                )
-                return cleaned_data
-
-            input_df: pd.DataFrame = pd.read_csv(input_file)
         return cleaned_data
 
 

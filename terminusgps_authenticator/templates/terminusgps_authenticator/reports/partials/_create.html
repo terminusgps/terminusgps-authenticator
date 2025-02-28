@@ -1,0 +1,5 @@
+<form class="{{ class }}" action="{% url 'create report' %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit">
+</form>
