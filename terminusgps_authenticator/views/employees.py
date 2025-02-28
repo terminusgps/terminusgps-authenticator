@@ -7,17 +7,12 @@ from typing import Any
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import (
-    DetailView,
-    FormView,
-    ListView,
-    UpdateView,
-    DeleteView,
-)
+from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
 
 from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.views.base import HtmxTemplateView
 from terminusgps_authenticator.forms import EmployeeBatchCreateForm, EmployeeCreateForm
+from terminusgps_authenticator.utils import generate_random_password
 
 
 class EmployeeCreateView(FormView, HtmxTemplateView):
@@ -30,16 +25,14 @@ class EmployeeCreateView(FormView, HtmxTemplateView):
     http_method_names = ["get", "post"]
 
     def form_valid(self, form: EmployeeCreateForm) -> HttpResponseRedirect:
-        print(f"{get_user_model().objects.__dir__() = }")
-        username = form.cleaned_data["email"]
-        phone_number = form.cleaned_data["phone"]
-        password = "Terminus#1!"
-        fingerprint_code = form.cleaned_data["code"]
+        username: str = form.cleaned_data["email"]
+        password: str = generate_random_password()
+        fingerprint_code: str = form.cleaned_data["code"]
+        phone_number: str | None = form.cleaned_data["phone"]
 
         AuthenticatorEmployee.objects.create(
             user=get_user_model().objects.create_user(
-                username=username,
-                password=password,
+                username=username, password=password
             ),
             code=fingerprint_code,
             phone=phone_number,

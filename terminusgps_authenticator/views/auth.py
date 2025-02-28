@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView as LoginViewBase
 from django.contrib.auth.views import LogoutView as LogoutViewBase
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 
 from terminusgps_authenticator.views.base import HtmxTemplateView
@@ -31,9 +31,7 @@ class LoginView(LoginViewBase, HtmxTemplateView):
             "placeholder": "email@terminusgps.com",
             "autofocus": True,
         }
-        password_attrs = {
-            "class": css_class,
-        }
+        password_attrs = {"class": css_class}
 
         form = super().get_form(form_class)
         form.fields["username"].widget.attrs.update(username_attrs)
@@ -42,5 +40,9 @@ class LoginView(LoginViewBase, HtmxTemplateView):
 
 
 class LogoutView(LogoutViewBase, HtmxTemplateView):
+    http_method_names = ["get", "post"]
     template_name = "terminusgps_authenticator/logout.html"
     partial_template_name = "terminusgps_authenticator/partials/_logout.html"
+
+    def get_success_url(self) -> str:
+        return reverse("login")

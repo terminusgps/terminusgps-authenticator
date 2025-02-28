@@ -8,3 +8,4 @@ from .employees import (
 )
 from .auth import LoginView, LogoutView
 from .generic import LandingView, SettingsView
+from .logs import LogItemListView, LogItemDetailView

@@ -28,4 +28,6 @@ urlpatterns = [
         views.EmployeeDeleteView.as_view(),
         name="delete employee",
     ),
+    path("logs/", views.LogItemListView.as_view(), name="list logitems"),
+    path("logs/<int:pk>/", views.LogItemDetailView.as_view(), name="detail logitem"),
 ]

@@ -1,0 +1,17 @@
+<tr id="{{ logitem.pk }}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+        {{ logitem.employee.id }}
+    </th>
+    <td class="px-6 py-4">
+        {{ logitem.employee.email }}
+    </td>
+    <td class="px-6 py-4">
+        {{ logitem.datetime|date:'m/d/y' }}
+    </td>
+    <td class="px-6 py-4">
+        {{ logitem.datetime|date:'P' }}
+    </td>
+    <td class="px-6 py-4">
+        {{ logitem.action }}
+    </td>
+</tr>
