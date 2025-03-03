@@ -1,0 +1,13 @@
+{% extends "terminusgps_authenticator/layout.html" %}
+{% block content %}
+<div class="flex gap-2 justify-evenly">
+    {% if previous_month %}
+    <a href="{% url 'logs month' year=year month=previous_month|date:'m' %}">Last Month</a>
+    {% endif %}
+    {% if next_month %}
+    <a href="{% url 'logs month' year=year month=next_month|date:'m' %}">Next Month</a>
+    {% endif %}
+</div>
+{% include "terminusgps_authenticator/logs/partials/_month.html" %}
+{% include "terminusgps_authenticator/logs/paginator.html" %}
+{% endblock content %}

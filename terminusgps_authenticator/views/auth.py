@@ -10,7 +10,7 @@ from terminusgps_authenticator.views.base import HtmxTemplateView
 class LoginView(LoginViewBase, HtmxTemplateView):
     template_name = "terminusgps_authenticator/login.html"
     partial_template_name = "terminusgps_authenticator/partials/_login.html"
-    success_url = reverse_lazy("landing")
+    success_url = reverse_lazy("dashboard")
     extra_context = {
         "title": "Login",
         "class": "flex flex-col gap-4 m-8 p-8 bg-gray-300 rounded",

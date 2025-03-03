@@ -1,6 +1,12 @@
 from .auth import LoginView, LogoutView
-from .generic import LandingView, SettingsView
-from .logs import LogItemListView, LogItemDetailView
+from .generic import (
+    DashboardView,
+    SettingsView,
+    AboutView,
+    ContactView,
+    PrivacyPolicyView,
+    SourceCodeView,
+)
 from .employees import (
     EmployeeCreateView,
     EmployeeDetailView,
@@ -14,4 +20,10 @@ from .reports import (
     ReportDetailView,
     ReportDeleteView,
     ReportListView,
+)
+from .logs import (
+    LogArchiveIndexView,
+    LogArchiveYearView,
+    LogArchiveMonthView,
+    LogArchiveDayView,
 )

@@ -9,16 +9,23 @@
         <script src="{% static 'src/js/htmx.min.js' %}" defer></script>
     </head>
     <body class="h-fit bg-gradient-to-b from-terminus-red-100 to-terminus-red-900 bg-no-repeat text-gray-800 dark:text-white">
-        {% if user and user.is_authenticated %}
-        <div class="p-2 bg-stone-100 border-b-2 border-gray-300 flex gap-2 items-center">
-            Logged in as {{ user.username }}
-            <div hx-get="{% url 'logout' %}" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
+        <div class="p-4 bg-stone-100 border-b-gray-600 border-b">
+            <a href="{% url 'dashboard' %}" hx-boost="true" class="flex flex-inline gap-2 items-center p-2">
+                {% include "terminusgps_authenticator/logo.svg" with class="size-16" %}
+                <h2 class="text-xl font-semibold tracking-wider">Terminus GPS Authenticator</h2>
+            </a>
         </div>
-        {% endif %}
         <main>
-            {% block content %}
-            {% endblock content %}
+            <div class="flex">
+                {% include "terminusgps_authenticator/navbar.html" %}
+                <div class="flex flex-col gap-8 bg-stone-100 rounded m-8 p-8 w-full">
+                <h2 class="text-2xl font-bold">{{ title }}</h2>
+                {% block content %}
+                {% endblock content %}
+                </div>
+            </div>
         </main>
+        {% include "terminusgps_authenticator/footer.html" %}
         <script>
         document.body.addEventListener('htmx:configRequest', (event) => {
             event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';

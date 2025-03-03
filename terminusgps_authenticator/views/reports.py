@@ -13,6 +13,7 @@ class ReportListView(ListView, HtmxTemplateView):
     queryset = AuthenticatorLogReport.objects.all()
     ordering = "-datetime"
     paginate_by = 25
+    extra_context = {"title": "Reports"}
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object_list = self.get_queryset().order_by(self.get_ordering())

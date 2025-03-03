@@ -21,6 +21,7 @@ TAILWIND_OUTPUT = "src/static/src/css/output.css"
 DOCS_ROOT = os.path.join(BASE_DIR, "docs/build/html")
 DOCS_ACCESS = "public"
 FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
+AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
 
 # Application definition
 

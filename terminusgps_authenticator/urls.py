@@ -2,17 +2,21 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.LandingView.as_view(), name="landing"),
+    path("", views.DashboardView.as_view(), name="dashboard"),
     path("settings/", views.SettingsView.as_view(), name="settings"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
+    path("about/", views.AboutView.as_view(), name="about"),
+    path("contact/", views.ContactView.as_view(), name="contact"),
+    path("privacy/", views.PrivacyPolicyView.as_view(), name="privacy"),
+    path("source/", views.SourceCodeView.as_view(), name="source"),
     path("employees/new/", views.EmployeeCreateView.as_view(), name="create employee"),
     path(
         "employees/new/batch/",
         views.EmployeeBatchCreateView.as_view(),
         name="create employee batch",
     ),
-    path("employees/list/", views.EmployeeListView.as_view(), name="list employees"),
+    path("employees/", views.EmployeeListView.as_view(), name="list employees"),
     path(
         "employees/<int:pk>/",
         views.EmployeeDetailView.as_view(),
@@ -28,8 +32,18 @@ urlpatterns = [
         views.EmployeeDeleteView.as_view(),
         name="delete employee",
     ),
-    path("logs/", views.LogItemListView.as_view(), name="list logitems"),
-    path("logs/<int:pk>/", views.LogItemDetailView.as_view(), name="detail logitem"),
+    path("logs/", views.LogArchiveIndexView.as_view(), name="logs index"),
+    path("logs/<int:year>/", views.LogArchiveYearView.as_view(), name="logs year"),
+    path(
+        "logs/<int:year>/<int:month>/",
+        views.LogArchiveMonthView.as_view(month_format="%m"),
+        name="logs month",
+    ),
+    path(
+        "logs/<int:year>/<int:month>/<int:day>/",
+        views.LogArchiveDayView.as_view(),
+        name="logs day",
+    ),
     path("reports/", views.ReportListView.as_view(), name="list reports"),
     path("reports/new/", views.ReportCreateView.as_view(), name="create report"),
     path("reports/<int:pk>/", views.ReportDetailView.as_view(), name="detail report"),

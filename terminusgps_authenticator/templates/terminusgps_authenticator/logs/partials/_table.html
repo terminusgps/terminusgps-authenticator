@@ -1,0 +1,38 @@
+<div class="relative overflow-x-auto">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border-2 border-terminus-red-600">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    Employee
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Date
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Time
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Action
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in page_obj %}
+            <tr class="bg-white even:bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 text-gray-800">
+                <th scope="row" class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <a href="{% url 'detail employee' log.employee.pk %}" class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted">{{ log.employee.user.username }}</a>
+                </th>
+                <td class="px-6 py-3">
+                    {{ log.datetime|date:'m/d/y' }}
+                </td>
+                <td class="px-6 py-3">
+                    {{ log.datetime|date:'P' }}
+                </td>
+                <td class="px-6 py-3">
+                    {{ log.get_action_display }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -134,6 +134,9 @@ class AuthenticatorLogItem(models.Model):
     def __str__(self) -> str:
         return str(self.employee)
 
+    def get_absolute_url(self) -> str:
+        return reverse("detail logitem", kwargs={"pk": self.pk})
+
 
 class AuthenticatorLogReport(models.Model):
     datetime = models.DateTimeField(default=timezone.now)

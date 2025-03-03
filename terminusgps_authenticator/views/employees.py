@@ -1,10 +1,8 @@
-from django.contrib.auth import get_user_model
-import pandas as pd
-import pathlib
-
 from typing import Any
+import pandas as pd
 
 from django import forms
+from django.contrib.auth import get_user_model
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
@@ -21,7 +19,7 @@ class EmployeeCreateView(FormView, HtmxTemplateView):
     partial_template_name = "terminusgps_authenticator/employees/partials/_create.html"
     template_name = "terminusgps_authenticator/employees/create.html"
     form_class = EmployeeCreateForm
-    success_url = reverse_lazy("landing")
+    success_url = reverse_lazy("dashboard")
     http_method_names = ["get", "post"]
 
     def form_valid(self, form: EmployeeCreateForm) -> HttpResponseRedirect:
@@ -48,6 +46,7 @@ class EmployeeListView(ListView, HtmxTemplateView):
     partial_template_name = "terminusgps_authenticator/employees/partials/_list.html"
     ordering = "pk"
     paginate_by = 25
+    extra_context = {"title": "Employees"}
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object_list = self.get_queryset().order_by(self.get_ordering())
