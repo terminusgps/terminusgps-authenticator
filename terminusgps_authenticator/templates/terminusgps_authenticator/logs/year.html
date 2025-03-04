@@ -1,5 +1,13 @@
 {% extends "terminusgps_authenticator/layout.html" %}
 {% block content %}
+<div class="flex gap-4 text-terminus-red-800">
+    {% if previous_year %}
+    <a class="flex flex-inline px-8 py-6 bg-red-300 border-2 border-terminus-red-600 w-full items-center rounded gap-2 cursor-pointer hover:bg-red-400 transition-colors duration-300 ease-in-out" href="{% url 'logs year' year=previous_year|date:'Y' %}">Previous Year</a>
+    {% endif %}
+    {% if next_year %}
+    <a class="flex flex-inline px-8 py-6 bg-red-300 border-2 border-terminus-red-600 w-full items-center rounded gap-2 cursor-pointer hover:bg-red-400 transition-colors duration-300 ease-in-out" href="{% url 'logs year' year=next_year|date:'Y' %}">Next Year</a>
+    {% endif %}
+</div>
 {% include "terminusgps_authenticator/logs/partials/_year.html" %}
 {% include "terminusgps_authenticator/logs/paginator.html" %}
 {% endblock content %}

@@ -2,10 +2,10 @@ from typing import Any
 from django.views.generic import CreateView, DetailView, DeleteView, ListView
 
 from terminusgps_authenticator.models import AuthenticatorLogReport
-from terminusgps_authenticator.views.base import HtmxTemplateView
+from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 
 
-class ReportListView(ListView, HtmxTemplateView):
+class ReportListView(ListView, HtmxTemplateResponseMixin):
     template_name = "terminusgps_authenticator/reports/list.html"
     partial_template_name = "terminusgps_authenticator/reports/partials/_list.html"
     model = AuthenticatorLogReport
@@ -20,7 +20,7 @@ class ReportListView(ListView, HtmxTemplateView):
         return super().get_context_data(**kwargs)
 
 
-class ReportCreateView(CreateView, HtmxTemplateView):
+class ReportCreateView(CreateView, HtmxTemplateResponseMixin):
     template_name = "terminusgps_authenticator/reports/create.html"
     partial_template_name = "terminusgps_authenticator/reports/partials/_create.html"
     model = AuthenticatorLogReport
@@ -32,7 +32,7 @@ class ReportCreateView(CreateView, HtmxTemplateView):
         return super().get_context_data(**kwargs)
 
 
-class ReportDetailView(DetailView, HtmxTemplateView):
+class ReportDetailView(DetailView, HtmxTemplateResponseMixin):
     template_name = "terminusgps_authenticator/reports/detail.html"
     partial_template_name = "terminusgps_authenticator/reports/partials/_detail.html"
     model = AuthenticatorLogReport
@@ -43,7 +43,7 @@ class ReportDetailView(DetailView, HtmxTemplateView):
         return super().get_context_data(**kwargs)
 
 
-class ReportDeleteView(DeleteView, HtmxTemplateView):
+class ReportDeleteView(DeleteView, HtmxTemplateResponseMixin):
     template_name = "terminusgps_authenticator/reports/detail.html"
     partial_template_name = "terminusgps_authenticator/reports/partials/_detail.html"
     model = AuthenticatorLogReport

@@ -36,7 +36,7 @@ urlpatterns = [
     path("logs/<int:year>/", views.LogArchiveYearView.as_view(), name="logs year"),
     path(
         "logs/<int:year>/<int:month>/",
-        views.LogArchiveMonthView.as_view(month_format="%m"),
+        views.LogArchiveMonthView.as_view(),
         name="logs month",
     ),
     path(

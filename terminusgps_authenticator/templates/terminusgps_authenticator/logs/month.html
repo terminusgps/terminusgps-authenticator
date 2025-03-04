@@ -1,11 +1,11 @@
 {% extends "terminusgps_authenticator/layout.html" %}
 {% block content %}
-<div class="flex gap-2 justify-evenly">
+<div class="flex gap-4 text-terminus-red-800">
     {% if previous_month %}
-    <a href="{% url 'logs month' year=year month=previous_month|date:'m' %}">Last Month</a>
+    <a class="flex flex-inline px-8 py-6 bg-red-300 border-2 border-terminus-red-600 w-full items-center rounded gap-2 cursor-pointer hover:bg-red-400 transition-colors duration-300 ease-in-out" href="{% url 'logs month' year=month|date:'Y' month=previous_month|date:'m' %}">Previous Month</a>
     {% endif %}
     {% if next_month %}
-    <a href="{% url 'logs month' year=year month=next_month|date:'m' %}">Next Month</a>
+    <a class="flex flex-inline px-8 py-6 bg-red-300 border-2 border-terminus-red-600 w-full items-center rounded gap-2 cursor-pointer hover:bg-red-400 transition-colors duration-300 ease-in-out" href="{% url 'logs month' year=month|date:'Y' month=next_month|date:'m' %}">Next Month</a>
     {% endif %}
 </div>
 {% include "terminusgps_authenticator/logs/partials/_month.html" %}

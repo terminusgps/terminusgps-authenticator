@@ -4,10 +4,10 @@ from django.contrib.auth.views import LogoutView as LogoutViewBase
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 
-from terminusgps_authenticator.views.base import HtmxTemplateView
+from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 
 
-class LoginView(LoginViewBase, HtmxTemplateView):
+class LoginView(HtmxTemplateResponseMixin, LoginViewBase):
     template_name = "terminusgps_authenticator/login.html"
     partial_template_name = "terminusgps_authenticator/partials/_login.html"
     success_url = reverse_lazy("dashboard")
@@ -39,7 +39,7 @@ class LoginView(LoginViewBase, HtmxTemplateView):
         return form
 
 
-class LogoutView(LogoutViewBase, HtmxTemplateView):
+class LogoutView(HtmxTemplateResponseMixin, LogoutViewBase):
     http_method_names = ["get", "post"]
     template_name = "terminusgps_authenticator/logout.html"
     partial_template_name = "terminusgps_authenticator/partials/_logout.html"
