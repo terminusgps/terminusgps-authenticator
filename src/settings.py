@@ -1,4 +1,5 @@
 import os
+import stat
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,6 +23,7 @@ DOCS_ROOT = os.path.join(BASE_DIR, "docs/build/html")
 DOCS_ACCESS = "public"
 FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
 AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
+FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
 
 # Application definition
 
@@ -104,11 +106,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = os.path.join(BASE_DIR, "static/")
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_DIRS.append(BASE_DIR / "src" / "static")
-MEDIA_URL = "media/"
-MEDIA_ROOT = "/media/"
+MEDIA_URL = os.path.join(BASE_DIR, "media/")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

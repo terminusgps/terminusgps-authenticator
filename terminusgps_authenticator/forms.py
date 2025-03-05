@@ -12,6 +12,31 @@ from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.validators import validate_spreadsheet_file
 
 
+class EmployeeSearchForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": "p-2 border-2 border-terminus-red-600 bg-gray-100 rounded w-full block",
+                "placeholder": "Search...",
+            }
+        ),
+    )
+    status = forms.NullBooleanField(
+        required=False,
+        widget=forms.widgets.Select(
+            choices=[
+                ("", "Punched in/out"),
+                (True, "Punched in"),
+                (False, "Punched out"),
+            ],
+            attrs={
+                "class": "p-2 border-2 border-terminus-red-600 bg-gray-100 rounded w-full block"
+            },
+        ),
+    )
+
+
 class EmployeeBatchCreateForm(forms.Form):
     input_file = forms.FileField(
         label="Input file",

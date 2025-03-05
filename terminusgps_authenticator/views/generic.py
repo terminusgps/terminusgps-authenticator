@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
-from django.conf import settings, ImproperlyConfigured
 
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 

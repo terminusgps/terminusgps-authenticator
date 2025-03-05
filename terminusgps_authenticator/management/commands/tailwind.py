@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import pathlib
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
@@ -16,6 +17,7 @@ class Command(BaseCommand):
 
         :raises ImproperlyConfigured: If :py:confval:`TAILWIND_INPUT` was not set.
         :raises ImproperlyConfigured: If :py:confval:`TAILWIND_OUTPUT` was not set.
+        :raises ImproperlyConfigured: If either input or output filepath were invalid.
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
@@ -25,6 +27,12 @@ class Command(BaseCommand):
             raise ImproperlyConfigured("'TAILWIND_INPUT' setting is required.")
         if not hasattr(settings, "TAILWIND_OUTPUT"):
             raise ImproperlyConfigured("'TAILWIND_OUTPUT' setting is required.")
+
+        try:
+            pathlib.Path(settings.TAILWIND_INPUT).resolve()
+            pathlib.Path(settings.TAILWIND_OUTPUT).resolve()
+        except OSError as e:
+            raise ImproperlyConfigured(e)
 
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         """
@@ -51,6 +59,22 @@ class Command(BaseCommand):
         subparsers.add_parser("start", help="Start the tailwind compiler")
         subparsers.add_parser("build", help="Build tailwind for production")
 
+    def handle(self, *args, **options):
+        """
+        Handles command execution based on the provided subcommand.
+
+        :raises CommandError: If the subcommand is invalid.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        subcommand = options["subcommand"]
+        try:
+            command = self.generate_command(subcommand)
+            os.system(command)
+        except ValueError as e:
+            raise CommandError(e)
+
     def generate_command(self, subcommand: str | None) -> str:
         """
         Generates a tailwind command based on the provided subcommand.
@@ -69,21 +93,20 @@ class Command(BaseCommand):
                 message = "Building tailwind for production..."
                 command += " --minify"
             case "install":
-                deps = self.get_package_dependencies()
-                if "tailwindcss" not in deps:
+                if not self.node_package_installed("tailwindcss"):
                     styled = self.style.NOTICE
                     message = "Installing tailwind..."
                     command = "npm install -D tailwindcss @tailwindcss/cli"
                 else:
                     styled = self.style.WARNING
                     message = "Tailwind is already installed, building for production instead..."
-                    command = self.generate_command("build")
+                    command += "--minify"
             case _:
                 raise ValueError("Invalid subcommand '%(cmd)s'" % {"cmd": subcommand})
         self.stdout.write(styled(message))
         return command
 
-    def get_package_dependencies(self) -> list[str]:
+    def get_node_dependencies(self) -> list[str]:
         """
         Retrives a list of application dependencies from ``package.json``.
 
@@ -101,18 +124,12 @@ class Command(BaseCommand):
             dependencies.extend(json.load(file).get("devDependencies").keys())
         return dependencies
 
-    def handle(self, *args, **options):
+    def node_package_installed(self, name: str) -> bool:
         """
-        Handles command execution based on the provided subcommand.
+        Checks whether or not a node package is installed.
 
-        :raises CommandError: If the subcommand is invalid.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
+        :returns: Whether or not node package ``name`` is installed.
+        :rtype: :py:obj:`bool`
 
         """
-        subcommand = options["subcommand"]
-        try:
-            command = self.generate_command(subcommand)
-            os.system(command)
-        except ValueError as e:
-            raise CommandError(e)
+        return name in self.get_node_dependencies()

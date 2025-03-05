@@ -9,21 +9,17 @@
         <script src="{% static 'src/js/htmx.min.js' %}" defer></script>
     </head>
     <body class="h-fit bg-gradient-to-b from-terminus-red-100 to-terminus-red-900 bg-no-repeat text-gray-800 dark:text-white">
-        <div class="p-4 bg-stone-100 border-b-gray-600 border-b">
+        <div class="p-4 bg-stone-100">
             <a href="{% url 'dashboard' %}" hx-boost="true" class="flex flex-inline gap-2 items-center p-2">
                 {% include "terminusgps_authenticator/logo.svg" with class="size-16" %}
                 <h2 class="text-xl font-semibold tracking-wider">Terminus GPS Authenticator</h2>
             </a>
         </div>
-        <main>
-            <div class="flex">
-                {% include "terminusgps_authenticator/navbar.html" %}
-                <div class="flex flex-col gap-8 bg-stone-100 rounded m-8 p-8 w-full">
-                <h2 class="text-2xl font-bold">{{ title }}</h2>
-                {% block content %}
-                {% endblock content %}
-                </div>
-            </div>
+        {% include "terminusgps_authenticator/navbar.html" %}
+        <main class="flex flex-col gap-8 bg-stone-100 rounded m-8 p-8">
+            <h2 class="text-2xl font-bold">{{ title }}</h2>
+            {% block content %}
+            {% endblock content %}
         </main>
         {% include "terminusgps_authenticator/footer.html" %}
         <script>

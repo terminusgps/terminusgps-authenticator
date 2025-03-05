@@ -1,14 +1,20 @@
+from django.db.models import QuerySet
 import pandas as pd
+from typing import Any
 
 from django import forms
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
 
 from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
-from terminusgps_authenticator.forms import EmployeeBatchCreateForm, EmployeeCreateForm
+from terminusgps_authenticator.forms import (
+    EmployeeBatchCreateForm,
+    EmployeeCreateForm,
+    EmployeeSearchForm,
+)
 from terminusgps_authenticator.utils import generate_random_password
 
 
@@ -40,12 +46,26 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
 class EmployeeListView(HtmxTemplateResponseMixin, ListView):
     http_method_names = ["get"]
     model = AuthenticatorEmployee
-    queryset = AuthenticatorEmployee.objects.all()
     template_name = "terminusgps_authenticator/employees/list.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_list.html"
     ordering = "pk"
     paginate_by = 25
     extra_context = {"title": "Employees"}
+
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+        if self.request.GET.get("q"):
+            queryset = queryset.filter(
+                user__username__icontains=self.request.GET.get("q")
+            )
+        if self.request.GET.get("status"):
+            queryset = queryset.filter(_punched_in=self.request.GET.get("status"))
+        return queryset
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["form"] = EmployeeSearchForm(initial={"status": None})
+        return context
 
 
 class EmployeeBatchCreateView(HtmxTemplateResponseMixin, FormView):
@@ -75,9 +95,14 @@ class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
     template_name = "terminusgps_authenticator/employees/detail.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_detail.html"
     queryset = AuthenticatorEmployee.objects.all()
-    fields = ["user", "code"]
     context_object_name = "employee"
     http_method_names = ["get"]
+    extra_context = {"class": "bg-gray-200 border border-gray-600 p-8 rounded"}
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["title"] = self.get_object().user.username
+        return context
 
 
 class EmployeeUpdateView(HtmxTemplateResponseMixin, UpdateView):

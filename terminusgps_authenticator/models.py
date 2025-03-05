@@ -38,11 +38,17 @@ def create_logitem(action: str | None = None) -> Callable:
 
 class AuthenticatorEmployee(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.PROTECT)
-    """Django user for the employee."""
+    """A Django user."""
     phone = models.CharField(max_length=12, blank=True, null=True, default=None)
-    """An optional phone number for the employee."""
+    """An optional phone number."""
     code = EncryptedCharField(verbose_name="fingerprint code", max_length=2048)
-    """A fingerprint code for the employee."""
+    """A fingerprint code."""
+    pfp = models.ImageField(
+        verbose_name="profile picture", null=True, blank=True, default=None
+    )
+    """An optional profile picture image file."""
+    title = models.CharField(max_length=64, null=True, blank=True, default=None)
+    """An optional employee title."""
     _punched_in = models.BooleanField(default=False, db_column="punched_in")
 
     class Meta:

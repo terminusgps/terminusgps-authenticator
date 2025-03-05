@@ -5,9 +5,8 @@ from terminusgps_authenticator.models import AuthenticatorEmployee, Authenticato
 
 @admin.register(AuthenticatorEmployee)
 class AuthenticatorEmployeeAdmin(admin.ModelAdmin):
-    list_display = ["user"]
     fieldsets = [
-        (None, {"fields": ["user"]}),
+        (None, {"fields": ["user", "title", "pfp"]}),
         ("Read-only", {"fields": ["code", "_punched_in"]}),
     ]
     readonly_fields = ["code", "_punched_in"]
