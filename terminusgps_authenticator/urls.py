@@ -33,6 +33,11 @@ urlpatterns = [
         name="delete employee",
     ),
     path("logs/", views.LogArchiveIndexView.as_view(), name="logs index"),
+    path(
+        "logs/employees/<int:pk>/",
+        views.EmployeeLogIndexView.as_view(),
+        name="employee logs",
+    ),
     path("logs/<int:year>/", views.LogArchiveYearView.as_view(), name="logs year"),
     path(
         "logs/<int:year>/<int:month>/",

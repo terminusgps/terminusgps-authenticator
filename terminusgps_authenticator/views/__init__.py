@@ -26,4 +26,5 @@ from .logs import (
     LogArchiveYearView,
     LogArchiveMonthView,
     LogArchiveDayView,
+    EmployeeLogIndexView,
 )

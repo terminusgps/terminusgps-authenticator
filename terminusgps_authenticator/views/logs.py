@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from django.views.generic import (
     ArchiveIndexView,
     DayArchiveView,
@@ -7,6 +8,22 @@ from django.views.generic import (
 
 from terminusgps_authenticator.models import AuthenticatorLogItem
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
+
+
+class EmployeeLogIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
+    allow_empty = True
+    date_field = "datetime"
+    http_method_names = ["get"]
+    model = AuthenticatorLogItem
+    ordering = "-datetime"
+    paginate_by = 5
+    partial_template_name = (
+        "terminusgps_authenticator/logs/partials/_employee_index.html"
+    )
+    template_name = "terminusgps_authenticator/logs/employee_index.html"
+
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(employee__pk=self.kwargs["pk"])
 
 
 class LogArchiveIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):

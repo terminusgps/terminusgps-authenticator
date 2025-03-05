@@ -12,6 +12,28 @@ from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.validators import validate_spreadsheet_file
 
 
+class ReportCreateForm(forms.Form):
+    start_date = forms.DateField(widget=forms.widgets.DateInput(attrs={"type": "date"}))
+    end_date = forms.DateField(widget=forms.widgets.DateInput(attrs={"type": "date"}))
+    employees = forms.ModelMultipleChoiceField(
+        queryset=AuthenticatorEmployee.objects.all()
+    )
+
+    def clean(self) -> dict[str, Any] | None:
+        cleaned_data: dict[str, Any] | None = super().clean()
+        if cleaned_data:
+            start_date = cleaned_data.get("start_date")
+            end_date = cleaned_data.get("end_date")
+            date_diff = end_date - start_date
+
+            if date_diff.days < 0:
+                raise ValidationError(
+                    _("Whoops! Invalid start/end date combination."), code="invalid"
+                )
+
+        return cleaned_data
+
+
 class EmployeeSearchForm(forms.Form):
     q = forms.CharField(
         required=False,

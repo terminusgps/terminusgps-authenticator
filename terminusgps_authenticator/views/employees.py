@@ -1,12 +1,19 @@
-from django.db.models import QuerySet
 import pandas as pd
 from typing import Any
 
 from django import forms
 from django.contrib.auth import get_user_model
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
+from django.views.generic import (
+    DetailView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+    DeleteView,
+)
 
 from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
@@ -16,6 +23,34 @@ from terminusgps_authenticator.forms import (
     EmployeeSearchForm,
 )
 from terminusgps_authenticator.utils import generate_random_password
+
+
+class EmployeePunchInView(HtmxTemplateResponseMixin, TemplateView):
+    template_name = "terminusgps_authenticator/employees/punch_in.html"
+    partial_template_name = (
+        "terminusgps_authenticator/employees/partials/_punch_in.html"
+    )
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.object = AuthenticatorEmployee.objects.get(pk=self.kwargs["pk"])
+        except AuthenticatorEmployee.DoesNotExist:
+            self.object = None
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not self.object or self.object._punched_in:
+            return HttpResponse(status=401)
+        self.object._punched_in = False
+        self.object.save()
+        return super().get(request, *args, **kwargs)
+
+
+class EmployeePunchOutView(HtmxTemplateResponseMixin, TemplateView):
+    template_name = "terminusgps_authenticator/employees/punch_out.html"
+    partial_template_name = (
+        "terminusgps_authenticator/employees/partials/_punch_out.html"
+    )
 
 
 class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
@@ -97,7 +132,7 @@ class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
     queryset = AuthenticatorEmployee.objects.all()
     context_object_name = "employee"
     http_method_names = ["get"]
-    extra_context = {"class": "bg-gray-200 border border-gray-600 p-8 rounded"}
+    extra_context = {"class": "flex flex-col gap-8"}
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
