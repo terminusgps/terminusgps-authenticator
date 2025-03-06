@@ -2,6 +2,7 @@ from django.db.models import QuerySet
 from django.views.generic import (
     ArchiveIndexView,
     DayArchiveView,
+    DetailView,
     MonthArchiveView,
     YearArchiveView,
 )
@@ -24,6 +25,15 @@ class EmployeeLogIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
 
     def get_queryset(self) -> QuerySet:
         return super().get_queryset().filter(employee__pk=self.kwargs["pk"])
+
+
+class LogDetailView(HtmxTemplateResponseMixin, DetailView):
+    extra_context = {"title": "Log Detail"}
+    http_method_names = ["get"]
+    model = AuthenticatorLogItem
+    template_name = "terminusgps_authenticator/logs/detail.html"
+    partial_template_name = "terminusgps_authenticator/logs/partials/_detail.html"
+    context_object_name = "log"
 
 
 class LogArchiveIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):

@@ -132,12 +132,7 @@ class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
     queryset = AuthenticatorEmployee.objects.all()
     context_object_name = "employee"
     http_method_names = ["get"]
-    extra_context = {"class": "flex flex-col gap-8"}
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = self.get_object().user.username
-        return context
+    extra_context = {"class": "flex flex-col gap-8", "title": "Employee Details"}
 
 
 class EmployeeUpdateView(HtmxTemplateResponseMixin, UpdateView):

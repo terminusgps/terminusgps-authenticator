@@ -26,7 +26,7 @@
         </a>
     </div>
     <div id="logs" class="flex flex-col gap-4">
-        <h2 class="text-lg font-semibold">Employee Log</h2>
+        <h2 class="text-lg font-semibold">{{ employee.user.username }} Log</h2>
         <div hx-target="this" hx-trigger="load, every 2s" hx-get="{% url 'employee logs' employee.pk %}"></div>
     </div>
 </div>

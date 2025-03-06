@@ -49,6 +49,7 @@ urlpatterns = [
         views.LogArchiveDayView.as_view(),
         name="logs day",
     ),
+    path("logs/<int:pk>/detail/", views.LogDetailView.as_view(), name="detail log"),
     path("reports/", views.ReportListView.as_view(), name="list reports"),
     path("reports/new/", views.ReportCreateView.as_view(), name="create report"),
     path("reports/<int:pk>/", views.ReportDetailView.as_view(), name="detail report"),
