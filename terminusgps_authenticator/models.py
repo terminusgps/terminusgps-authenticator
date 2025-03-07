@@ -1,9 +1,5 @@
-from functools import wraps
-from typing import Callable, Any
-
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -15,25 +11,8 @@ class LogAction(models.TextChoices):
     PUNCH_IN = "punch_in", _("Punched in")
     PUNCH_OUT = "punch_out", _("Punched out")
     ASSIGN_CODE = "assign_code", _("Assigned fingerprint code")
-
-
-def create_logitem(action: str | None = None) -> Callable:
-    """Creates a log item for the action name, if provided."""
-
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(self, *args, **kwargs) -> Any:
-            result: Any = func(self, *args, **kwargs)
-            if action and action.upper() in LogAction._member_names_:
-                log_action = getattr(LogAction, action.upper())
-                AuthenticatorLogItem.objects.create(
-                    employee=self, action=log_action, datetime=timezone.now()
-                )
-            return result
-
-        return wrapper
-
-    return decorator
+    CREATED = "created", _("Created")
+    UNKNOWN = "unknown", _("Unknown action")
 
 
 class AuthenticatorEmployee(models.Model):
@@ -49,7 +28,12 @@ class AuthenticatorEmployee(models.Model):
     """An optional profile picture image file."""
     title = models.CharField(max_length=64, null=True, blank=True, default=None)
     """An optional employee title."""
-    _punched_in = models.BooleanField(default=False, db_column="punched_in")
+    punched_in = models.BooleanField(default=False)
+    """Whether or not the employee is currently punched in."""
+    _prev_punch_state = models.BooleanField(null=True, blank=True, default=None)
+    _prev_fingerprint_code = EncryptedCharField(
+        null=True, blank=True, default=None, max_length=2048
+    )
 
     class Meta:
         verbose_name = "employee"
@@ -59,66 +43,34 @@ class AuthenticatorEmployee(models.Model):
         """Returns the employee's username."""
         return str(self.user.username)
 
+    def save(self, **kwargs) -> None:
+        """Checks if the employee's attributes were updated and generates a log if necessary."""
+        if self.pk:
+            now = timezone.now()
+            action = LogAction.UNKNOWN
+
+            if self.punched_in != self._prev_punch_state:
+                punched_in = self._prev_punch_state is False and self.punched_in is True
+                action = LogAction.PUNCH_IN if punched_in else LogAction.PUNCH_OUT
+
+                AuthenticatorLogItem.objects.create(
+                    employee=self, datetime=now, action=action
+                )
+                self._prev_punch_state = self.punched_in
+
+            if self.code != self._prev_fingerprint_code:
+                self._prev_fingerprint_code = self.code
+                action = LogAction.ASSIGN_CODE
+
+                AuthenticatorLogItem.objects.create(
+                    employee=self, datetime=now, action=action
+                )
+
+        super().save(**kwargs)
+
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the employee's detail view."""
         return reverse("detail employee", kwargs={"pk": self.pk})
-
-    @property
-    def email(self) -> str:
-        """The employee's email, if it was set."""
-        return self.user.email or self.user.username
-
-    @property
-    def punched_in(self) -> bool:
-        """Whether or not the employee is currently punched in."""
-        return bool(self._punched_in)
-
-    @transaction.atomic
-    @create_logitem(action="punch_in")
-    def punch_in(self) -> None:
-        """
-        Punches the employee in.
-
-        :raises AssertionError: If the employee was already punched in.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
-
-        """
-        assert not self._punched_in, "Employee is already punched in."
-        self._punched_in = True
-
-    @transaction.atomic
-    @create_logitem(action="punch_out")
-    def punch_out(self) -> None:
-        """
-        Punches the employee out.
-
-        :raises AssertionError: If the employee was already punched out.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
-
-        """
-        assert self._punched_in, "Employee is already punched out."
-        self._punched_in = False
-
-    @transaction.atomic
-    @create_logitem(action="assign_code")
-    def assign_code(self, fingerprint_code: str) -> None:
-        """
-        Assigns a fingerprint code to the employee.
-
-        :param fingerprint_code: A fingerprint code.
-        :type fingerprint_code: :py:obj:`str`
-        :raises ValueError: If the fingerprint code is longer than 2048 characters.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
-
-        """
-        if len(fingerprint_code) > 2048:
-            raise ValueError(
-                f"'fingerprint_code' cannot be longer than 2048 characters, got '{len(fingerprint_code)}'."
-            )
-        self.code = fingerprint_code
 
 
 class AuthenticatorLogItem(models.Model):
@@ -129,7 +81,7 @@ class AuthenticatorLogItem(models.Model):
     )
     """Employee that created the log item."""
     action = models.CharField(
-        max_length=1024, choices=LogAction.choices, default=LogAction.PUNCH_IN
+        max_length=1024, choices=LogAction.choices, default=LogAction.UNKNOWN
     )
     """Action that was called to trigger logging."""
 

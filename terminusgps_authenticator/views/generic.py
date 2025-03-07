@@ -25,8 +25,8 @@ class DashboardView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView)
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["employee_data"] = {
-            "Punched In": AuthenticatorEmployee.objects.filter(_punched_in=True),
-            "Punched Out": AuthenticatorEmployee.objects.filter(_punched_in=False),
+            "Punched In": AuthenticatorEmployee.objects.filter(punched_in=True),
+            "Punched Out": AuthenticatorEmployee.objects.filter(punched_in=False),
         }
         return context
 

@@ -44,17 +44,14 @@ class EmployeeSearchForm(forms.Form):
             }
         ),
     )
-    status = forms.NullBooleanField(
+    status = forms.ChoiceField(
         required=False,
-        widget=forms.widgets.Select(
+        widget=forms.widgets.RadioSelect(
             choices=[
                 ("", "Punched in/out"),
-                (True, "Punched in"),
-                (False, "Punched out"),
-            ],
-            attrs={
-                "class": "p-2 border-2 border-terminus-red-600 bg-gray-100 rounded w-full block"
-            },
+                ("in", "Punched in"),
+                ("out", "Punched out"),
+            ]
         ),
     )
 
@@ -64,10 +61,21 @@ class EmployeeBatchCreateForm(forms.Form):
         label="Input file",
         allow_empty_file=False,
         validators=[validate_spreadsheet_file],
+        widget=widgets.FileInput(
+            attrs={"class": "p-2 rounded bg-white border border-gray-600"}
+        ),
     )
 
 
 class EmployeeCreateForm(forms.Form):
+    pfp = forms.FileField(
+        allow_empty_file=True,
+        required=False,
+        label="Employee Profile Picture",
+        widget=widgets.FileInput(
+            attrs={"class": "p-2 rounded bg-white border border-gray-600"}
+        ),
+    )
     email = forms.EmailField(
         label="Employee Email",
         validators=[validate_email],
