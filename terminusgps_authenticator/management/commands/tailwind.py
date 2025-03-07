@@ -1,38 +1,13 @@
 import argparse
 import json
 import os
-import pathlib
 
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
     help = "Builds and/or compiles tailwind classes"
-
-    def __init__(self, *args, **kwargs) -> None:
-        """
-        Ensures necessary settings are set before calling the command.
-
-        :raises ImproperlyConfigured: If :py:confval:`TAILWIND_INPUT` was not set.
-        :raises ImproperlyConfigured: If :py:confval:`TAILWIND_OUTPUT` was not set.
-        :raises ImproperlyConfigured: If either input or output filepath were invalid.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
-
-        """
-        super().__init__(*args, **kwargs)
-        if not hasattr(settings, "TAILWIND_INPUT"):
-            raise ImproperlyConfigured("'TAILWIND_INPUT' setting is required.")
-        if not hasattr(settings, "TAILWIND_OUTPUT"):
-            raise ImproperlyConfigured("'TAILWIND_OUTPUT' setting is required.")
-
-        try:
-            pathlib.Path(settings.TAILWIND_INPUT).resolve()
-            pathlib.Path(settings.TAILWIND_OUTPUT).resolve()
-        except OSError as e:
-            raise ImproperlyConfigured(e)
 
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         """
@@ -41,9 +16,9 @@ class Command(BaseCommand):
         +-------------+-------------------------------------------------------------------+
         | Subcommand  | Action                                                            |
         +=============+===================================================================+
-        | ``install`` | Installs the tailwind compiler for the project.                   |
-        +-------------+-------------------------------------------------------------------+
         | ``build``   | Builds the tailwind output file for production.                   |
+        +-------------+-------------------------------------------------------------------+
+        | ``install`` | Installs the tailwind compiler for the project.                   |
         +-------------+-------------------------------------------------------------------+
         | ``start``   | Starts the tailwind compiler. Must be canceled with ``<CTRL>-c``. |
         +-------------+-------------------------------------------------------------------+
@@ -55,9 +30,9 @@ class Command(BaseCommand):
 
         """
         subparsers = parser.add_subparsers(dest="subcommand")
+        subparsers.add_parser("build", help="Build tailwind for production")
         subparsers.add_parser("install", help="Install tailwind")
         subparsers.add_parser("start", help="Start the tailwind compiler")
-        subparsers.add_parser("build", help="Build tailwind for production")
 
     def handle(self, *args, **options):
         """
@@ -82,7 +57,8 @@ class Command(BaseCommand):
         :returns: A command to be executed by :py:func:`os.system`.
         :rtype: :py:obj:`str`
         """
-        command = f"npx @tailwindcss/cli -i {settings.TAILWIND_INPUT} -o {settings.TAILWIND_OUTPUT}"
+        input, output = self.get_input_filepath(), self.get_output_filepath()
+        command = f"npx @tailwindcss/cli -i {input} -o {output}"
         match subcommand:
             case "start":
                 styled = self.style.NOTICE
@@ -133,3 +109,11 @@ class Command(BaseCommand):
 
         """
         return name in self.get_node_dependencies()
+
+    def get_input_filepath(self) -> str:
+        """Returns the first input.css file found in ``BASE_DIR/css``."""
+        return list(settings.BASE_DIR.glob("**/css/input.css"))[0]
+
+    def get_output_filepath(self) -> str:
+        """Returns the first output.css file found in ``BASE_DIR/css``."""
+        return list(settings.BASE_DIR.glob("**/css/output.css"))[0]
