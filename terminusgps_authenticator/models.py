@@ -72,6 +72,12 @@ class AuthenticatorEmployee(models.Model):
         """Returns a URL pointing to the employee's detail view."""
         return reverse("detail employee", kwargs={"pk": self.pk})
 
+    def get_latest_log(self):
+        qs = AuthenticatorLogItem.objects.filter(employee=self).order_by("-datetime")
+
+        if qs.exists():
+            return qs.first()
+
 
 class AuthenticatorLogItem(models.Model):
     datetime = models.DateTimeField(default=timezone.now)

@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.db.models import QuerySet
 from django.views.generic import (
     ArchiveIndexView,
@@ -34,6 +36,11 @@ class LogDetailView(HtmxTemplateResponseMixin, DetailView):
     template_name = "terminusgps_authenticator/logs/detail.html"
     partial_template_name = "terminusgps_authenticator/logs/partials/_detail.html"
     context_object_name = "log"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["title"] = f"Log #{self.kwargs['pk']}"
+        return context
 
 
 class LogArchiveIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):

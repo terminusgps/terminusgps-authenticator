@@ -10,8 +10,9 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
+from django.contrib.messages.views import SuccessMessageMixin
 
-from terminusgps_authenticator.models import AuthenticatorEmployee
+from terminusgps_authenticator.models import AuthenticatorEmployee, AuthenticatorLogItem
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 from terminusgps_authenticator.forms import (
     EmployeeBatchCreateForm,
@@ -137,7 +138,7 @@ class EmployeeBatchCreateView(HtmxTemplateResponseMixin, FormView):
         return df
 
 
-class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
+class EmployeeDetailView(SuccessMessageMixin, HtmxTemplateResponseMixin, DetailView):
     model = AuthenticatorEmployee
     template_name = "terminusgps_authenticator/employees/detail.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_detail.html"
@@ -145,12 +146,26 @@ class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
     context_object_name = "employee"
     http_method_names = ["get", "patch"]
     extra_context = {"class": "flex flex-col gap-8", "title": "Employee Details"}
+    success_message = "'%(name)s' was %(action)s successfully."
 
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.headers.get("HX-Request"):
             return HttpResponse(status=403)
+        status = request.GET.get("status")
 
+        if status is not None:
+            employee = self.get_object()
+            employee.punched_in = True if status == "true" else False
+            employee.save()
         return self.get(request, *args, **kwargs)
+
+    def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
+        latest_log = self.object.get_latest_log()
+        return self.success_message % dict(
+            cleaned_data,
+            name=self.object.user.username,
+            action=latest_log.get_action_display(),
+        )
 
 
 class EmployeeUpdateView(HtmxTemplateResponseMixin, UpdateView):
