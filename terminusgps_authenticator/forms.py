@@ -41,6 +41,7 @@ class EmployeeSearchForm(forms.Form):
             attrs={
                 "class": "p-2 border-2 border-terminus-red-600 bg-gray-100 rounded w-full block",
                 "placeholder": "Search...",
+                "autofocus": True,
             }
         ),
     )

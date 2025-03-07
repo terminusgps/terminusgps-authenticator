@@ -1,43 +1,32 @@
 <div class="relative overflow-x-auto">
-    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border-2 border-terminus-red-600">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+    <table class="w-full border-2 border-terminus-red-600 text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+        <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
             <tr>
                 <th scope="col" class="px-6 py-3">
-                    Employee
+                    User
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Date
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Time
+                    Date + Time
                 </th>
                 <th scope="col" class="px-6 py-3">
                 </th>
             </tr>
         </thead>
         <tbody>
-            {% for log in page_obj %}
-            <tr class="bg-white even:bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 text-gray-800">
-                <th scope="row" class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    {{ report.employee.user.username }}
+            {% for report in page_obj %}
+            <tr class="border-b border-gray-200 bg-white text-gray-800 even:bg-gray-200 dark:border-gray-700 dark:bg-gray-800">
+                <th scope="row" class="px-6 py-3 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                    {{ report.user.username }}
                 </th>
-                <td class="px-6 py-3">
-                    {{ report.datetime|date:'m/d/y' }}
-                </td>
-                <td class="px-6 py-3">
-                    {{ report.datetime|date:'P' }}
+                <td class="px-6 py-3 text-nowrap">
+                    {{ report.datetime|date:'m/d/y' }}, {{ report.datetime|date:'P' }}
                 </td>
                 <td class="px-6 py-3">
                     <div class="flex justify-evenly">
                         <input
-                            class="block w-full text-center"
+                            class="cursor-pointer rounded border bg-gray-200 p-2 text-center text-gray-800 hover:bg-gray-50 block w-full transition-colors duration-300 ease-in-out"
                             type="button"
                             value="Download"
-                        >
-                        <input
-                            class="block w-full text-center"
-                            type="button"
-                            value="Delete"
                         >
                     </div>
                 </td>

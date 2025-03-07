@@ -92,11 +92,11 @@ class AuthenticatorLogItem(models.Model):
     """Action that was called to trigger logging."""
 
     class Meta:
-        verbose_name = "log item"
-        verbose_name_plural = "log items"
+        verbose_name = "log"
+        verbose_name_plural = "logs"
 
     def __str__(self) -> str:
-        return str(self.employee)
+        return f"{str(self.employee)} - #{self.pk}"
 
     def get_absolute_url(self) -> str:
         return reverse("detail logitem", kwargs={"pk": self.pk})
@@ -104,11 +104,42 @@ class AuthenticatorLogItem(models.Model):
 
 class AuthenticatorLogReport(models.Model):
     datetime = models.DateTimeField(default=timezone.now)
-    """Date and time for the report."""
+    """Date and time the report was created."""
     user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
-    """User that triggered the report."""
-    items = models.ManyToManyField("terminusgps_authenticator.AuthenticatorLogItem")
-    """Log items selected for the report."""
+    """User that created the report."""
+    logs = models.ManyToManyField("terminusgps_authenticator.AuthenticatorLogItem")
+    """Logs selected for the report."""
+    file = models.FileField(null=True, blank=True, default=None)
+    """A programatically generated pdf file for the report."""
+
+    class Meta:
+        verbose_name = "report"
+        verbose_name_plural = "reports"
 
     def __str__(self) -> str:
         return f"Report #{self.pk}"
+
+
+class AuthenticatorEmployeeShift(models.Model):
+    start_datetime = models.DateTimeField()
+    """Start date and time for the shift."""
+    end_datetime = models.DateTimeField()
+    """End date and time for the shift."""
+    employee = models.ForeignKey(
+        "terminusgps_authenticator.AuthenticatorEmployee", on_delete=models.CASCADE
+    )
+    """Employee that worked the shift."""
+    tdelta = models.DurationField(blank=True, null=True, default=None)
+    """Time difference between start and end datetimes."""
+
+    class Meta:
+        verbose_name = "shift"
+        verbose_name_plural = "shifts"
+
+    def __str__(self) -> str:
+        return f"Shift #{self.pk}"
+
+    def save(self, **kwargs) -> None:
+        if not self.tdelta:
+            self.tdelta = self.end_datetime - self.start_datetime
+        super().save(**kwargs)

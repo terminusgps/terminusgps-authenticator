@@ -2,7 +2,6 @@ from .auth import LoginView, LogoutView
 from .generic import (
     DashboardView,
     SettingsView,
-    AboutView,
     ContactView,
     PrivacyPolicyView,
     SourceCodeView,

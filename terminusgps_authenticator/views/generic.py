@@ -44,13 +44,6 @@ class SettingsView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps_authenticator/settings.html"
 
 
-class AboutView(HtmxTemplateResponseMixin, TemplateView):
-    http_method_names = ["get"]
-    partial_template_name = "terminusgps_authenticator/partials/_about.html"
-    template_name = "terminusgps_authenticator/about.html"
-    extra_context = {"title": "About"}
-
-
 class ContactView(HtmxTemplateResponseMixin, TemplateView):
     http_method_names = ["get"]
     partial_template_name = "terminusgps_authenticator/partials/_contact.html"

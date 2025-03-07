@@ -6,7 +6,6 @@ urlpatterns = [
     path("settings/", views.SettingsView.as_view(), name="settings"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
-    path("about/", views.AboutView.as_view(), name="about"),
     path("contact/", views.ContactView.as_view(), name="contact"),
     path("privacy/", views.PrivacyPolicyView.as_view(), name="privacy"),
     path("source/", views.SourceCodeView.as_view(), name="source"),

@@ -30,17 +30,12 @@ class EmployeeLogIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
 
 
 class LogDetailView(HtmxTemplateResponseMixin, DetailView):
-    extra_context = {"title": "Log Detail"}
+    extra_context = {"title": "Inspect Log"}
     http_method_names = ["get"]
     model = AuthenticatorLogItem
     template_name = "terminusgps_authenticator/logs/detail.html"
     partial_template_name = "terminusgps_authenticator/logs/partials/_detail.html"
     context_object_name = "log"
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = f"Log #{self.kwargs['pk']}"
-        return context
 
 
 class LogArchiveIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):

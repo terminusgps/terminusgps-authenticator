@@ -2,7 +2,12 @@ from django.contrib import admin
 from django.contrib import messages
 from django.utils.translation import ngettext
 
-from terminusgps_authenticator.models import AuthenticatorEmployee, AuthenticatorLogItem
+from terminusgps_authenticator.models import (
+    AuthenticatorEmployee,
+    AuthenticatorLogItem,
+    AuthenticatorLogReport,
+    AuthenticatorEmployeeShift,
+)
 
 
 @admin.register(AuthenticatorEmployee)
@@ -53,3 +58,14 @@ class AuthenticatorEmployeeAdmin(admin.ModelAdmin):
 class AuthenticatorLogItemAdmin(admin.ModelAdmin):
     list_display = ["employee", "action", "datetime"]
     readonly_fields = ["employee", "action", "datetime"]
+
+
+@admin.register(AuthenticatorLogReport)
+class AuthenticatorLogReportAdmin(admin.ModelAdmin):
+    list_display = ["user", "datetime"]
+
+
+@admin.register(AuthenticatorEmployeeShift)
+class AuthenticatorEmployeeShiftAdmin(admin.ModelAdmin):
+    list_display = ["employee", "start_datetime", "end_datetime", "tdelta"]
+    readonly_fields = ["tdelta", "employee"]
