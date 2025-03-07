@@ -9,11 +9,11 @@
             </div>
         </div>
     </div>
-    <div class="flex flex-col gap-4">
-        <div class="p-4 bg-fuchsia-100 rounded" hx-patch="{% url 'detail employee' employee.pk %}?status=true" hx-trigger="click">
+    <div class="flex flex-col md:flex-row justify-evenly gap-4">
+        <div class="flex-inline p-4 bg-fuchsia-100 block rounded w-full" hx-patch="{% url 'detail employee' employee.pk %}?status=true" hx-trigger="click">
             Punch in
         </div>
-        <div class="p-4 bg-blue-400 rounded" hx-patch="{% url 'detail employee' employee.pk %}?status=false" hx-trigger="click">
+        <div class="flex-inline p-4 bg-blue-400 block rounded w-full" hx-patch="{% url 'detail employee' employee.pk %}?status=false" hx-trigger="click">
             Punch out
         </div>
     </div>
