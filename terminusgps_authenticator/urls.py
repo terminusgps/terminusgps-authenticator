@@ -31,6 +31,11 @@ urlpatterns = [
         views.EmployeeDeleteView.as_view(),
         name="delete employee",
     ),
+    path(
+        "employees/<int:pk>/set-fingerprint/",
+        views.EmployeeSetFingerprintView.as_view(),
+        name="set fingerprint",
+    ),
     path("logs/", views.LogArchiveIndexView.as_view(), name="logs index"),
     path(
         "logs/employees/<int:pk>/",

@@ -7,12 +7,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
-TAILWIND_INPUT = "src/static/src/css/input.css"
-TAILWIND_OUTPUT = "src/static/src/css/output.css"
 FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
 AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
 FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP

@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.db.models import QuerySet
 from django.views.generic import (
     ArchiveIndexView,
@@ -48,6 +46,10 @@ class LogArchiveIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
     paginate_by = 15
     partial_template_name = "terminusgps_authenticator/logs/partials/_index.html"
     template_name = "terminusgps_authenticator/logs/index.html"
+
+    def get_queryset(self) -> QuerySet:
+        qs = super().get_queryset()
+        return qs
 
 
 class LogArchiveYearView(HtmxTemplateResponseMixin, YearArchiveView):

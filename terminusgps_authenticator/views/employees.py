@@ -1,4 +1,5 @@
 from django.contrib.auth.base_user import AbstractBaseUser
+from django import forms
 import pandas as pd
 from typing import Any
 
@@ -7,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
@@ -34,9 +35,9 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
     def form_valid(self, form: EmployeeCreateForm) -> HttpResponseRedirect:
         username: str = form.cleaned_data["email"]
         password: str = generate_random_password()
+        profile_pic: File | None = form.cleaned_data["pfp"]
         fingerprint_code: str | None = form.cleaned_data["code"]
         phone_number: str | None = form.cleaned_data["phone"]
-        profile_picture: File | None = form.cleaned_data["pfp"]
 
         AuthenticatorEmployee.objects.create(
             user=get_user_model().objects.create_user(
@@ -44,7 +45,7 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
             ),
             code=fingerprint_code,
             phone=phone_number,
-            pfp=profile_picture,
+            pfp=profile_pic,
         )
         return HttpResponseRedirect(self.get_success_url())
 
@@ -183,3 +184,19 @@ class EmployeeDeleteView(HtmxTemplateResponseMixin, DeleteView):
     queryset = AuthenticatorEmployee.objects.all()
     context_object_name = "employee"
     http_method_names = ["get", "post"]
+
+
+class EmployeeSetFingerprintView(HtmxTemplateResponseMixin, UpdateView):
+    model = AuthenticatorEmployee
+    template_name = "terminusgps_authenticator/employees/set_fingerprint.html"
+    partial_template_name = (
+        "terminusgps_authenticator/employees/partials/_set_fingerprint.html"
+    )
+    queryset = AuthenticatorEmployee.objects.all()
+    context_object_name = "employee"
+    http_method_names = ["get", "post"]
+    fields = ["code"]
+
+    def form_valid(self, form: forms.ModelForm) -> HttpResponseRedirect:
+        employee = self.get_object()
+        return HttpResponseRedirect(employee.get_absolute_url())

@@ -13,6 +13,7 @@ from .employees import (
     EmployeeDeleteView,
     EmployeeBatchCreateView,
     EmployeeListView,
+    EmployeeSetFingerprintView,
 )
 from .reports import (
     ReportCreateView,

@@ -112,8 +112,8 @@ class Command(BaseCommand):
 
     def get_input_filepath(self) -> str:
         """Returns the first input.css file found in ``BASE_DIR/css``."""
-        return list(settings.BASE_DIR.glob("**/css/input.css"))[0]
+        return "./src/static/src/css/input.css"
 
     def get_output_filepath(self) -> str:
         """Returns the first output.css file found in ``BASE_DIR/css``."""
-        return list(settings.BASE_DIR.glob("**/css/output.css"))[0]
+        return "./src/static/src/css/output.css"

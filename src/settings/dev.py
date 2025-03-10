@@ -17,8 +17,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-TAILWIND_INPUT = "src/static/src/css/input.css"
-TAILWIND_OUTPUT = "src/static/src/css/output.css"
 FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
 AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
 FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
