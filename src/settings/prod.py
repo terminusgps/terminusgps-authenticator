@@ -2,25 +2,17 @@ import os
 import stat
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ig%^xfx+y+bwo*6fs3wzgd&lteu9meb02_h#c=-)b$gi&bs5d*"
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
 TAILWIND_INPUT = "src/static/src/css/input.css"
 TAILWIND_OUTPUT = "src/static/src/css/output.css"
-DOCS_ROOT = os.path.join(BASE_DIR, "docs/build/html")
-DOCS_ACCESS = "public"
 FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
 AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
 FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
@@ -103,15 +95,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = os.path.join(BASE_DIR, "static/")
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATICFILES_DIRS.append(BASE_DIR / "src" / "static")
 MEDIA_URL = os.path.join(BASE_DIR, "media/")
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

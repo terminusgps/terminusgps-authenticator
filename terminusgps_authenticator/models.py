@@ -30,7 +30,11 @@ class AuthenticatorEmployee(models.Model):
     """An optional employee title."""
     punched_in = models.BooleanField(default=False)
     """Whether or not the employee is currently punched in."""
-    _prev_punch_state = models.BooleanField(null=True, blank=True, default=None)
+    shifts = models.ManyToManyField(
+        "terminusgps_authenticator.AuthenticatorEmployeeShift"
+    )
+    """Shifts the employee has worked."""
+    _prev_punch_state = models.BooleanField(default=False)
     _prev_fingerprint_code = EncryptedCharField(
         null=True, blank=True, default=None, max_length=2048
     )
@@ -107,10 +111,14 @@ class AuthenticatorLogReport(models.Model):
     """Date and time the report was created."""
     user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
     """User that created the report."""
+    pdf = models.FileField(null=True, blank=True, default=None)
+    """A programatically generated pdf file for the report."""
     logs = models.ManyToManyField("terminusgps_authenticator.AuthenticatorLogItem")
     """Logs selected for the report."""
-    file = models.FileField(null=True, blank=True, default=None)
-    """A programatically generated pdf file for the report."""
+    shifts = models.ManyToManyField(
+        "terminusgps_authenticator.AuthenticatorEmployeeShift", blank=True, default=None
+    )
+    """Shifts generated for the report."""
 
     class Meta:
         verbose_name = "report"
@@ -129,8 +137,8 @@ class AuthenticatorEmployeeShift(models.Model):
         "terminusgps_authenticator.AuthenticatorEmployee", on_delete=models.CASCADE
     )
     """Employee that worked the shift."""
-    tdelta = models.DurationField(blank=True, null=True, default=None)
-    """Time difference between start and end datetimes."""
+    duration = models.DurationField(blank=True, null=True, default=None)
+    """Duration of the shift (in seconds)."""
 
     class Meta:
         verbose_name = "shift"
@@ -140,6 +148,6 @@ class AuthenticatorEmployeeShift(models.Model):
         return f"Shift #{self.pk}"
 
     def save(self, **kwargs) -> None:
-        if not self.tdelta:
-            self.tdelta = self.end_datetime - self.start_datetime
+        if not self.duration:
+            self.duration = self.end_datetime - self.start_datetime
         super().save(**kwargs)

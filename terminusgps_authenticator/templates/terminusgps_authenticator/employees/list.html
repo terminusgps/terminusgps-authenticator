@@ -1,10 +1,10 @@
 {% extends "terminusgps_authenticator/layout.html" %}
 {% block content %}
-<form class="flex flex-col gap-2" hx-include="*" hx-get="{% url 'list employees' %}" hx-target="#employee-list" hx-swap="outerHTML" hx-trigger="keyup changed delay:150ms, input">
-    {% csrf_token %}
+<form class="flex flex-col gap-2" hx-get="{% url 'list employees' %}" hx-target="#employee-list" hx-swap="outerHTML" hx-trigger="keyup changed delay:150, input">
     {{ form.q }}
 </form>
 {% include "terminusgps_authenticator/employees/partials/_list.html" %}
+{% if page_obj.has_previous or page_obj.has_next %}{% include "terminusgps_authenticator/paginator.html" %}{% endif %}
 <div id="actions" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-red-800" hx-boost="true">
     <a class="select-none flex flex-inline p-4 bg-red-200 rounded items-center gap-2 border-2 border-red-800 cursor-pointer hover:bg-red-100 transition-colors duration-300 ease-in-out" href="{% url 'create employee' %}">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">

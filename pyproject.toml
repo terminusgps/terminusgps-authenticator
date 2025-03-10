@@ -57,6 +57,7 @@ skip-magic-trailing-comma = true
 [dependency-groups]
 dev = [
     "autoclasstoc>=1.7.0",
+    "django-browser-reload>=1.18.0",
     "django-docs>=0.3.3",
     "sphinx>=8.2.1",
     "sphinxawesome-theme>=5.3.2",

@@ -5,7 +5,7 @@ from typing import Any
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -28,13 +28,13 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
     partial_template_name = "terminusgps_authenticator/employees/partials/_create.html"
     template_name = "terminusgps_authenticator/employees/create.html"
     form_class = EmployeeCreateForm
-    success_url = reverse_lazy("dashboard")
+    success_url = reverse_lazy("list employees")
     http_method_names = ["get", "post"]
 
     def form_valid(self, form: EmployeeCreateForm) -> HttpResponseRedirect:
         username: str = form.cleaned_data["email"]
         password: str = generate_random_password()
-        fingerprint_code: str = form.cleaned_data["code"]
+        fingerprint_code: str | None = form.cleaned_data["code"]
         phone_number: str | None = form.cleaned_data["phone"]
         profile_picture: File | None = form.cleaned_data["pfp"]
 
@@ -54,24 +54,22 @@ class EmployeeListView(HtmxTemplateResponseMixin, ListView):
     model = AuthenticatorEmployee
     template_name = "terminusgps_authenticator/employees/list.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_list.html"
-    ordering = "pk"
-    paginate_by = 25
+    ordering = "user__username"
+    paginate_by = 5
     extra_context = {"title": "Employees"}
 
-    def get_queryset(self) -> QuerySet:
-        queryset = super().get_queryset()
-        if self.request.GET.get("q"):
-            queryset = queryset.filter(
-                user__username__icontains=self.request.GET.get("q")
-            )
-        if self.request.GET.get("punched_in"):
-            punched_in = True if self.request.GET.get("punched_in") == "True" else False
-            queryset = queryset.filter(punched_in=punched_in)
+    def get_queryset(self, **kwargs) -> QuerySet:
+        queryset = super().get_queryset(**kwargs)
+        q, status = self.request.GET.get("q"), self.request.GET.get("status")
+        form = EmployeeSearchForm({"q": q, "status": status})
+        if q and form.is_valid():
+            filters = Q(user__username__iexact=q) | Q(user__username__istartswith=q)
+            queryset = queryset.filter(filters)
         return queryset
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["form"] = EmployeeSearchForm(initial={"punched_in": None})
+        context["form"] = EmployeeSearchForm()
         return context
 
 
