@@ -161,11 +161,10 @@ class AuthenticatorLogReport(models.Model):
         unique_ids: list[int] = []
         seen_ids: set[int] = set()
 
-        for log in self.logs.filter():
-            emp_id: int = log.employee.pk
-            if emp_id not in seen_ids:
-                unique_ids.append(emp_id)
-                seen_ids.add(emp_id)
+        for log in self.logs.all():
+            if log.employee.pk not in seen_ids:
+                unique_ids.append(log.employee.pk)
+                seen_ids.add(log.employee.pk)
         return unique_ids
 
     def generate_employee_shifts(

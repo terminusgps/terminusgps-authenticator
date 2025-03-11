@@ -36,17 +36,15 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
     def form_valid(self, form: EmployeeCreateForm) -> HttpResponseRedirect:
         username: str = form.cleaned_data["email"]
         password: str = generate_random_password()
-        profile_pic: File | None = form.cleaned_data["pfp"]
-        fingerprint_code: str | None = form.cleaned_data["code"]
-        phone_number: str | None = form.cleaned_data["phone"]
 
         AuthenticatorEmployee.objects.create(
             user=get_user_model().objects.create_user(
                 username=username, password=password
             ),
-            code=fingerprint_code,
-            phone=phone_number,
-            pfp=profile_pic,
+            code=form.cleaned_data["code"],
+            phone=form.cleaned_data["phone"],
+            pfp=form.cleaned_data["pfp"],
+            title=form.cleaned_data["title"],
         )
         return HttpResponseRedirect(self.get_success_url())
 

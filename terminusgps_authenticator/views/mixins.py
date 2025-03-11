@@ -24,6 +24,6 @@ class HtmxTemplateResponseMixin(TemplateResponseMixin):
         htmx_request = self.request.headers.get("HX-Request", False)
         boosted = self.request.headers.get("HX-Boosted", False)
 
-        if all([self.partial_template_name, htmx_request]) and not boosted:
+        if htmx_request and self.partial_template_name and not boosted:
             self.template_name = self.partial_template_name
         return super().render_to_response(context, **response_kwargs)
