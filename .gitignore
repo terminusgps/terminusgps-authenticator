@@ -4,6 +4,7 @@ db.*
 output/
 package-lock.json
 node_modules/
+migrations/
 
 # Python-generated files
 __pycache__/

@@ -1,8 +1,7 @@
 from datetime import datetime
-from reportlab.pdfgen import canvas
-from io import BytesIO
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
-from django.http import FileResponse, HttpRequest, HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, DeleteView, FormView, ListView
 from django.utils import timezone
@@ -15,7 +14,7 @@ from terminusgps_authenticator.forms import ReportCreateForm
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 
 
-class ReportListView(ListView, HtmxTemplateResponseMixin):
+class ReportListView(LoginRequiredMixin, ListView, HtmxTemplateResponseMixin):
     template_name = "terminusgps_authenticator/reports/list.html"
     partial_template_name = "terminusgps_authenticator/reports/partials/_list.html"
     model = AuthenticatorLogReport
@@ -24,6 +23,9 @@ class ReportListView(ListView, HtmxTemplateResponseMixin):
     ordering = "-datetime"
     paginate_by = 25
     extra_context = {"title": "Reports"}
+    login_url = reverse_lazy("login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
 
 
 class ReportCreateView(FormView, HtmxTemplateResponseMixin):

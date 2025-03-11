@@ -63,9 +63,10 @@ class AuthenticatorLogItemAdmin(admin.ModelAdmin):
 @admin.register(AuthenticatorLogReport)
 class AuthenticatorLogReportAdmin(admin.ModelAdmin):
     list_display = ["user", "datetime"]
+    fields = ["datetime", "user", "pdf", "logs"]
 
 
 @admin.register(AuthenticatorEmployeeShift)
 class AuthenticatorEmployeeShiftAdmin(admin.ModelAdmin):
     list_display = ["employee", "start_datetime", "end_datetime", "duration"]
-    readonly_fields = ["employee", "duration"]
+    readonly_fields = ["employee", "duration", "report"]

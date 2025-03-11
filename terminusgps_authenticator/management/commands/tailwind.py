@@ -2,12 +2,11 @@ import argparse
 import json
 import os
 
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 
 class Command(BaseCommand):
-    help = "Builds and/or compiles tailwind classes"
+    help = "Builds and compiles tailwind classes in the project"
 
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         """

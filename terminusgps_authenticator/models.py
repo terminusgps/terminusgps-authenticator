@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -30,10 +31,6 @@ class AuthenticatorEmployee(models.Model):
     """An optional employee title."""
     punched_in = models.BooleanField(default=False)
     """Whether or not the employee is currently punched in."""
-    shifts = models.ManyToManyField(
-        "terminusgps_authenticator.AuthenticatorEmployeeShift"
-    )
-    """Shifts the employee has worked."""
     _prev_punch_state = models.BooleanField(default=False)
     _prev_fingerprint_code = EncryptedCharField(
         null=True, blank=True, default=None, max_length=2048
@@ -106,28 +103,6 @@ class AuthenticatorLogItem(models.Model):
         return reverse("detail logitem", kwargs={"pk": self.pk})
 
 
-class AuthenticatorLogReport(models.Model):
-    datetime = models.DateTimeField(default=timezone.now)
-    """Date and time the report was created."""
-    user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
-    """User that created the report."""
-    pdf = models.FileField(null=True, blank=True, default=None)
-    """A programatically generated pdf file for the report."""
-    logs = models.ManyToManyField("terminusgps_authenticator.AuthenticatorLogItem")
-    """Logs selected for the report."""
-    shifts = models.ManyToManyField(
-        "terminusgps_authenticator.AuthenticatorEmployeeShift", blank=True, default=None
-    )
-    """Shifts generated for the report."""
-
-    class Meta:
-        verbose_name = "report"
-        verbose_name_plural = "reports"
-
-    def __str__(self) -> str:
-        return f"Report #{self.pk}"
-
-
 class AuthenticatorEmployeeShift(models.Model):
     start_datetime = models.DateTimeField()
     """Start date and time for the shift."""
@@ -138,16 +113,89 @@ class AuthenticatorEmployeeShift(models.Model):
     )
     """Employee that worked the shift."""
     duration = models.DurationField(blank=True, null=True, default=None)
-    """Duration of the shift (in seconds)."""
+    """Duration of the shift."""
+    report = models.ForeignKey(
+        "terminusgps_authenticator.AuthenticatorLogReport",
+        on_delete=models.CASCADE,
+        related_name="shifts",
+    )
+    """Report that generated the shift."""
 
     class Meta:
         verbose_name = "shift"
         verbose_name_plural = "shifts"
 
     def __str__(self) -> str:
-        return f"Shift #{self.pk}"
+        return f"{self.employee} shift #{self.pk}"
 
     def save(self, **kwargs) -> None:
         if not self.duration:
             self.duration = self.end_datetime - self.start_datetime
         super().save(**kwargs)
+
+
+class AuthenticatorLogReport(models.Model):
+    datetime = models.DateTimeField(default=timezone.now)
+    """Date and time the report was created."""
+    user = models.ForeignKey(get_user_model(), on_delete=models.PROTECT)
+    """User that created the report."""
+    pdf = models.FileField(null=True, blank=True, default=None)
+    """A programatically generated pdf file for the report."""
+    logs = models.ManyToManyField("terminusgps_authenticator.AuthenticatorLogItem")
+    """Logs selected for the report."""
+
+    class Meta:
+        verbose_name = "report"
+        verbose_name_plural = "reports"
+
+    def __str__(self) -> str:
+        return f"Report #{self.pk}"
+
+    def get_absolute_url(self) -> str:
+        """Returns a URL pointing to the report's detail view."""
+        return reverse("detail report", kwargs={"pk": self.pk})
+
+    def get_unique_employee_ids(self) -> list[int]:
+        """Retrieves a list of employee ids for the report."""
+        assert self.logs.exists(), "Report logs were not set."
+        unique_ids: list[int] = []
+        seen_ids: set[int] = set()
+
+        for log in self.logs.filter():
+            emp_id: int = log.employee.pk
+            if emp_id not in seen_ids:
+                unique_ids.append(emp_id)
+                seen_ids.add(emp_id)
+        return unique_ids
+
+    def generate_employee_shifts(
+        self, employee_id: int
+    ) -> list[AuthenticatorEmployeeShift | None]:
+        """Generates and returns a list of shifts for the employee by id."""
+        assert self.logs.exists(), "Report logs were not set."
+        punch_in, punch_out = LogAction.PUNCH_IN, LogAction.PUNCH_OUT
+        actions: list[LogAction] = [punch_in, punch_out]
+        shifts: list[AuthenticatorEmployeeShift | None] = []
+        queryset: QuerySet = self.logs.filter(employee__pk=employee_id)
+        prev: AuthenticatorLogItem | None = None
+
+        for curr in queryset.order_by("datetime"):
+            if curr.action not in actions:
+                continue
+
+            if prev and prev.action == punch_in and curr.action == punch_out:
+                shifts.append(
+                    AuthenticatorEmployeeShift.objects.create(
+                        start_datetime=prev.datetime,
+                        end_datetime=curr.datetime,
+                        employee=curr.employee,
+                        report=self,
+                    )
+                )
+                prev: AuthenticatorLogItem | None = None
+            else:
+                prev: AuthenticatorLogItem | None = (
+                    curr if curr.action == punch_in else None
+                )
+
+        return shifts

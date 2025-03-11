@@ -6,7 +6,10 @@
                     Email
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Date + Time
+                    Date
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Time
                 </th>
                 <th scope="col" class="px-6 py-3">
                     Action
@@ -22,7 +25,10 @@
                     {{ log.employee.user.username }}
                 </th>
                 <td class="px-6 py-3 text-nowrap">
-                    {{ log.datetime|date:'m/d/Y, P' }}
+                    {{ log.datetime|date:'m/d/Y' }}
+                </td>
+                <td class="px-6 py-3 text-nowrap">
+                    {{ log.datetime|date:'P' }}
                 </td>
                 <td class="px-6 py-3 text-nowrap">
                     {{ log.get_action_display }}

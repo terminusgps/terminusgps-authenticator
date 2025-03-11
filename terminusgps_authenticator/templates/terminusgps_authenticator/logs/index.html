@@ -1,5 +1,5 @@
 {% extends "terminusgps_authenticator/layout.html" %}
 {% block content %}
 {% include "terminusgps_authenticator/logs/partials/_index.html" %}
-{% include "terminusgps_authenticator/paginator.html" %}
+{% if page_obj.has_prev or page_obj.has_next %}{% include "terminusgps_authenticator/paginator.html" %}{% endif %}
 {% endblock content %}

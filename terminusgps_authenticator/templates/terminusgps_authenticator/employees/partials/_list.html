@@ -16,7 +16,7 @@
         </thead>
         <tbody>
             {% for employee in page_obj %}
-            <tr onclick='window.location="{% url 'detail employee' employee.id %}"' id="{{ employee.id }}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-red-50 cursor-pointer group transition-colors duration-300 ease-in-out">
+            <tr onclick='window.location="{{ employee.get_absolute_url }}"' id="{{ employee.id }}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-red-50 cursor-pointer group transition-colors duration-300 ease-in-out">
                     <td class="p-4">
                         {% if employee.pfp %}<img class="w-12 rounded-full drop-shadow-sm" src="{{ employee.pfp.url }}">{% endif %}
                     </td>

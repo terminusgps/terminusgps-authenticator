@@ -1,5 +1,6 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
 import pandas as pd
 from typing import Any
 
@@ -8,12 +9,12 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
 from django.contrib.messages.views import SuccessMessageMixin
 
-from terminusgps_authenticator.models import AuthenticatorEmployee, AuthenticatorLogItem
+from terminusgps_authenticator.models import AuthenticatorEmployee
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 from terminusgps_authenticator.forms import (
     EmployeeBatchCreateForm,
@@ -50,7 +51,7 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class EmployeeListView(HtmxTemplateResponseMixin, ListView):
+class EmployeeListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView):
     http_method_names = ["get"]
     model = AuthenticatorEmployee
     template_name = "terminusgps_authenticator/employees/list.html"
@@ -58,6 +59,9 @@ class EmployeeListView(HtmxTemplateResponseMixin, ListView):
     ordering = "user__username"
     paginate_by = 5
     extra_context = {"title": "Employees"}
+    login_url = reverse_lazy("login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
 
     def get_queryset(self, **kwargs) -> QuerySet:
         queryset = super().get_queryset(**kwargs)

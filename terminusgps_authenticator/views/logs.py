@@ -1,4 +1,6 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
+from django.urls import reverse_lazy
 from django.views.generic import (
     ArchiveIndexView,
     DayArchiveView,
@@ -11,7 +13,9 @@ from terminusgps_authenticator.models import AuthenticatorLogItem
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 
 
-class EmployeeLogIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
+class EmployeeLogIndexView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, ArchiveIndexView
+):
     allow_empty = True
     date_field = "datetime"
     http_method_names = ["get"]
@@ -22,9 +26,14 @@ class EmployeeLogIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
         "terminusgps_authenticator/logs/partials/_employee_index.html"
     )
     template_name = "terminusgps_authenticator/logs/employee_index.html"
+    login_url = reverse_lazy("login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
 
     def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(employee__pk=self.kwargs["pk"])
+        qs: QuerySet = super().get_queryset()
+        pk: int = self.kwargs["pk"]
+        return qs.filter(employee__pk=pk)
 
 
 class LogDetailView(HtmxTemplateResponseMixin, DetailView):
