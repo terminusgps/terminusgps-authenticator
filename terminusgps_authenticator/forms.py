@@ -18,10 +18,21 @@ class SettingsForm(forms.Form): ...
 
 
 class ReportCreateForm(forms.Form):
-    start_date = forms.DateField(widget=forms.widgets.DateInput(attrs={"type": "date"}))
-    end_date = forms.DateField(widget=forms.widgets.DateInput(attrs={"type": "date"}))
+    start_date = forms.DateField(
+        widget=forms.widgets.DateInput(
+            attrs={"type": "date", "class": "p-2 bg-white rounded border"}
+        )
+    )
+    end_date = forms.DateField(
+        widget=forms.widgets.DateInput(
+            attrs={"type": "date", "class": "p-2 bg-white rounded border"}
+        )
+    )
     employees = forms.ModelMultipleChoiceField(
-        queryset=AuthenticatorEmployee.objects.all()
+        queryset=AuthenticatorEmployee.objects.all(),
+        widget=forms.widgets.CheckboxSelectMultiple(
+            attrs={"class": "p-2 bg-white rounded border"}
+        ),
     )
 
     def clean(self) -> dict[str, Any] | None:

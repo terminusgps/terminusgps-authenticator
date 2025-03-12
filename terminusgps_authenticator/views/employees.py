@@ -188,7 +188,9 @@ class EmployeeDeleteView(HtmxTemplateResponseMixin, DeleteView):
     http_method_names = ["get", "post"]
 
 
-class EmployeeSetFingerprintView(HtmxTemplateResponseMixin, UpdateView):
+class EmployeeSetFingerprintView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView
+):
     model = AuthenticatorEmployee
     template_name = "terminusgps_authenticator/employees/set_fingerprint.html"
     partial_template_name = (
@@ -198,7 +200,20 @@ class EmployeeSetFingerprintView(HtmxTemplateResponseMixin, UpdateView):
     context_object_name = "employee"
     http_method_names = ["get", "post"]
     fields = ["code"]
+    extra_context = {"title": "Update Fingerprint", "class": "flex flex-col gap-4"}
+    login_url = reverse_lazy("login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    initial = {"code": ""}
 
-    def form_valid(self, form: forms.ModelForm) -> HttpResponseRedirect:
-        employee = self.get_object()
-        return HttpResponseRedirect(employee.get_absolute_url())
+    def get_form(self, form_class=None) -> forms.ModelForm:
+        css_class = "p-2 bg-white border border-gray-600 rounded"
+        form = super().get_form(form_class)
+        form.fields["code"].widget.attrs.update(
+            {
+                "class": css_class,
+                "placeholder": "Waiting for fingerprint scan...",
+                "autofocus": True,
+            }
+        )
+        return form

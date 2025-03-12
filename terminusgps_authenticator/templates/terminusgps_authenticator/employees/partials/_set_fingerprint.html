@@ -1,5 +1,7 @@
-<form action="{% url 'set fingerprint' employee.pk %}" method="post" enctype="multipart/form-data">
+<form class="{{ class }}" action="{% url 'set fingerprint' employee.pk %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit">
+    {{ form.code.label }}
+    {{ form.code }}
+    {{ form.code.errors }}
+    <input class="mt-4 w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
 </form>

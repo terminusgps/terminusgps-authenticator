@@ -1,5 +1,21 @@
 <form class="{{ class }}" action="{% url 'create report' %}" method="post">
     {% csrf_token %}
-    {{ form }}
-    <input type="submit">
+    <div class="flex gap-2 overflow-x-auto">
+        <div class="flex flex-col gap-2">
+            {{ form.start_date.label }}
+            {{ form.start_date }}
+            {{ form.start_date.errors }}
+        </div>
+        <div class="flex flex-col gap-2">
+            {{ form.end_date.label }}
+            {{ form.end_date }}
+            {{ form.end_date.errors }}
+        </div>
+    </div>
+    <div class="flex flex-col gap-2">
+        {{ form.employees.label }}
+        {{ form.employees }}
+        {{ form.employees.errors }}
+    </div>
+    <input class="mt-4 w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
 </form>

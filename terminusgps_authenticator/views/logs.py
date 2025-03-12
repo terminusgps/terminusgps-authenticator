@@ -45,7 +45,9 @@ class LogDetailView(HtmxTemplateResponseMixin, DetailView):
     context_object_name = "log"
 
 
-class LogArchiveIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
+class LogArchiveIndexView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, ArchiveIndexView
+):
     allow_empty = True
     date_field = "datetime"
     extra_context = {"title": "Logs"}
@@ -55,6 +57,9 @@ class LogArchiveIndexView(HtmxTemplateResponseMixin, ArchiveIndexView):
     paginate_by = 15
     partial_template_name = "terminusgps_authenticator/logs/partials/_index.html"
     template_name = "terminusgps_authenticator/logs/index.html"
+    login_url = reverse_lazy("login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
 
     def get_queryset(self) -> QuerySet:
         qs = super().get_queryset()

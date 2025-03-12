@@ -1,12 +1,14 @@
+from typing import Any
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, DeleteView, FormView, ListView
 from django.utils import timezone
 
 from terminusgps_authenticator.models import (
+    AuthenticatorEmployee,
     AuthenticatorLogItem,
     AuthenticatorLogReport,
 )
@@ -33,14 +35,16 @@ class ReportCreateView(FormView, HtmxTemplateResponseMixin):
     partial_template_name = "terminusgps_authenticator/reports/partials/_create.html"
     http_method_names = ["get", "post"]
     form_class = ReportCreateForm
-    extra_context = {"title": "New Report"}
+    extra_context = {"title": "New Report", "class": "flex flex-col gap-4"}
     success_url = reverse_lazy("list reports")
 
     def form_valid(self, form: ReportCreateForm) -> HttpResponseRedirect | HttpResponse:
         start, end = form.cleaned_data["start_date"], form.cleaned_data["end_date"]
-        # TODO: Filter by employees
-        # employees = form.cleaned_data["employees"]
+        employees = form.cleaned_data["employees"]
         logs_qs = self.get_dated_logs(start, end)
+
+        if employees is not None:
+            logs_qs = logs_qs.filter(employee__in=employees)
 
         report = AuthenticatorLogReport.objects.create(
             datetime=timezone.now(), user=self.request.user

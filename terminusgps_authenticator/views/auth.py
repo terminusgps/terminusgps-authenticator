@@ -11,10 +11,7 @@ class LoginView(HtmxTemplateResponseMixin, LoginViewBase):
     template_name = "terminusgps_authenticator/login.html"
     partial_template_name = "terminusgps_authenticator/partials/_login.html"
     success_url = reverse_lazy("dashboard")
-    extra_context = {
-        "title": "Login",
-        "class": "flex flex-col gap-4 m-8 p-8 bg-gray-300 rounded",
-    }
+    extra_context = {"title": "Login", "class": "flex flex-col gap-4 p-4"}
 
     def get_success_url(self) -> str:
         return str(self.success_url)
