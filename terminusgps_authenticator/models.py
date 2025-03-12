@@ -151,50 +151,60 @@ class AuthenticatorLogReport(models.Model):
     def __str__(self) -> str:
         return f"Report #{self.pk}"
 
+    def save(self, **kwargs) -> None:
+        if self.pk and not self.shifts_generated:
+            self.generate_shifts()
+        super().save(**kwargs)
+
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the report's detail view."""
         return reverse("detail report", kwargs={"pk": self.pk})
 
+    def get_unique_employees(
+        self,
+    ) -> QuerySet[AuthenticatorEmployee, AuthenticatorEmployee | None]:
+        """Retrieves a queryset of employees for the report."""
+        assert self.logs.exists(), "Report logs were not set."
+        employee_ids = self.get_unique_employee_ids()
+        return AuthenticatorEmployee.objects.filter(pk__in=employee_ids)
+
     def get_unique_employee_ids(self) -> list[int]:
         """Retrieves a list of employee ids for the report."""
         assert self.logs.exists(), "Report logs were not set."
-        unique_ids: list[int] = []
-        seen_ids: set[int] = set()
+        return list(self.logs.values_list("employee__pk", flat=True).distinct())
 
-        for log in self.logs.all():
-            if log.employee.pk not in seen_ids:
-                unique_ids.append(log.employee.pk)
-                seen_ids.add(log.employee.pk)
-        return unique_ids
-
-    def generate_employee_shifts(
-        self, employee_id: int
-    ) -> list[AuthenticatorEmployeeShift | None]:
-        """Generates and returns a list of shifts for the employee by id."""
+    def generate_shifts(self) -> None:
+        """Generates employee shifts based on the report logs."""
         assert self.logs.exists(), "Report logs were not set."
         punch_in, punch_out = LogAction.PUNCH_IN, LogAction.PUNCH_OUT
         actions: list[LogAction] = [punch_in, punch_out]
-        shifts: list[AuthenticatorEmployeeShift | None] = []
-        queryset: QuerySet = self.logs.filter(employee__pk=employee_id)
         prev: AuthenticatorLogItem | None = None
 
-        for curr in queryset.order_by("datetime"):
-            if curr.action not in actions:
-                continue
+        for employee in self.get_unique_employees():
+            employee_logs = self.logs.filter(employee=employee).order_by("datetime")
 
-            if prev and prev.action == punch_in and curr.action == punch_out:
-                shifts.append(
+            for curr in employee_logs:
+                if curr.action not in actions:
+                    continue
+
+                if prev and prev.action == punch_in and curr.action == punch_out:
                     AuthenticatorEmployeeShift.objects.create(
                         start_datetime=prev.datetime,
                         end_datetime=curr.datetime,
-                        employee=curr.employee,
+                        employee=employee,
                         report=self,
                     )
-                )
-                prev: AuthenticatorLogItem | None = None
-            else:
-                prev: AuthenticatorLogItem | None = (
-                    curr if curr.action == punch_in else None
-                )
+                    prev: AuthenticatorLogItem | None = None
+                else:
+                    prev: AuthenticatorLogItem | None = curr
 
-        return shifts
+    @property
+    def shifts_generated(self) -> bool:
+        return AuthenticatorEmployeeShift.objects.filter(report=self).exists()
+
+    @property
+    def shifts(
+        self,
+    ) -> QuerySet[AuthenticatorEmployeeShift, AuthenticatorEmployeeShift | None]:
+        assert self.shifts_generated, "Employee shifts have not been generated yet."
+        return AuthenticatorEmployeeShift.objects.filter(report=self)
