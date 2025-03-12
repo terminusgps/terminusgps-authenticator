@@ -17,7 +17,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
+FIELD_ENCRYPTION_KEY = "A77vVn8KpLMjLMkEptaAV232jd-TPS0ahX51aPuT8pc="
 AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
 FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
 
