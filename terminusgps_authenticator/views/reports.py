@@ -1,14 +1,12 @@
-from typing import Any
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import DetailView, DeleteView, FormView, ListView
 from django.utils import timezone
+from django.views.generic import DetailView, DeleteView, FormView, ListView
 
 from terminusgps_authenticator.models import (
-    AuthenticatorEmployee,
     AuthenticatorLogItem,
     AuthenticatorLogReport,
 )
@@ -66,6 +64,7 @@ class ReportDetailView(DetailView, HtmxTemplateResponseMixin):
     partial_template_name = "terminusgps_authenticator/reports/partials/_detail.html"
     model = AuthenticatorLogReport
     http_method_names = ["get"]
+    context_object_name = "report"
 
 
 class ReportDownloadView(DetailView, HtmxTemplateResponseMixin):
@@ -73,10 +72,9 @@ class ReportDownloadView(DetailView, HtmxTemplateResponseMixin):
     partial_template_name = "terminusgps_authenticator/reports/partials/_download.html"
     model = AuthenticatorLogReport
     http_method_names = ["get"]
+    context_object_name = "report"
 
 
-class ReportDeleteView(DeleteView, HtmxTemplateResponseMixin):
-    template_name = "terminusgps_authenticator/reports/detail.html"
-    partial_template_name = "terminusgps_authenticator/reports/partials/_detail.html"
+class ReportDeleteView(DeleteView):
     model = AuthenticatorLogReport
     http_method_names = ["get", "post"]

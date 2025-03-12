@@ -15,8 +15,9 @@
                 <h2 class="text-xl font-semibold tracking-wider">Terminus GPS Authenticator</h2>
             </a>
             {% if request.user and request.user.is_authenticated %}
-            <form hx-get="{% url 'logout' %}" hx-trigger="load" hx-target="this" hx-swap="outerHTML">
-            </form>
+            <div class="flex flex-col gap-2">
+                <form hx-get="{% url 'logout' %}" hx-trigger="load" hx-target="this" hx-swap="outerHTML"></form>
+            </div>
             {% endif %}
         </div>
         <main class="m-8 flex flex-col flex-nowrap gap-8 rounded bg-stone-100 p-8 drop-shadow-lg">
