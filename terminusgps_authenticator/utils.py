@@ -2,6 +2,18 @@ import secrets
 import string
 
 
+def display_duration(total_seconds: float) -> str:
+    """Takes a float of seconds and renders it in a human-readable format."""
+    SECONDS_PER_HOUR: int = 3600
+    SECONDS_PER_MINUTE: int = 60
+
+    hours: float = total_seconds // SECONDS_PER_HOUR
+    remaining_seconds: float = total_seconds - (hours * SECONDS_PER_HOUR)
+    minutes: float = remaining_seconds // SECONDS_PER_MINUTE
+    seconds: float = remaining_seconds - (minutes * SECONDS_PER_MINUTE)
+    return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+
+
 def generate_random_password(length: int = 32) -> str:
     """
     Generates a random password and returns it.

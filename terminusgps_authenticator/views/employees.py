@@ -1,10 +1,11 @@
-from django.contrib.auth.base_user import AbstractBaseUser
-from django import forms
-from django.contrib.auth.mixins import LoginRequiredMixin
 import pandas as pd
 from typing import Any
 
+from django import forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db.models import Q, QuerySet
@@ -12,16 +13,15 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
-from django.contrib.messages.views import SuccessMessageMixin
 
-from terminusgps_authenticator.models import AuthenticatorEmployee
+from terminusgps_authenticator.models import Employee
+from terminusgps_authenticator.utils import generate_random_password
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 from terminusgps_authenticator.forms import (
     EmployeeBatchCreateForm,
     EmployeeCreateForm,
     EmployeeSearchForm,
 )
-from terminusgps_authenticator.utils import generate_random_password
 
 
 class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
@@ -37,7 +37,7 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
         username: str = form.cleaned_data["email"]
         password: str = generate_random_password()
 
-        AuthenticatorEmployee.objects.create(
+        Employee.objects.create(
             user=get_user_model().objects.create_user(
                 username=username, password=password
             ),
@@ -51,7 +51,7 @@ class EmployeeCreateView(HtmxTemplateResponseMixin, FormView):
 
 class EmployeeListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView):
     http_method_names = ["get"]
-    model = AuthenticatorEmployee
+    model = Employee
     template_name = "terminusgps_authenticator/employees/list.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_list.html"
     ordering = "user__username"
@@ -114,7 +114,7 @@ class EmployeeBatchCreateView(HtmxTemplateResponseMixin, FormView):
             user: AbstractBaseUser = get_user_model().objects.create_user(
                 username=email, password=generate_random_password()
             )
-            AuthenticatorEmployee.objects.create(user=user, phone=phone, title=title)
+            Employee.objects.create(user=user, phone=phone, title=title)
         return super().form_valid(form=form)
 
     def get_dataframe(self, input_file: File) -> pd.DataFrame | None:
@@ -139,15 +139,14 @@ class EmployeeBatchCreateView(HtmxTemplateResponseMixin, FormView):
         return df
 
 
-class EmployeeDetailView(SuccessMessageMixin, HtmxTemplateResponseMixin, DetailView):
-    model = AuthenticatorEmployee
+class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
+    model = Employee
     template_name = "terminusgps_authenticator/employees/detail.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_detail.html"
-    queryset = AuthenticatorEmployee.objects.all()
+    queryset = Employee.objects.all()
     context_object_name = "employee"
     http_method_names = ["get", "patch"]
     extra_context = {"class": "flex flex-col gap-8", "title": "Employee Details"}
-    success_message = "'%(name)s' was %(action)s successfully."
 
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.headers.get("HX-Request"):
@@ -160,30 +159,22 @@ class EmployeeDetailView(SuccessMessageMixin, HtmxTemplateResponseMixin, DetailV
             employee.save()
         return self.get(request, *args, **kwargs)
 
-    def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
-        latest_log = self.object.get_latest_log()
-        return self.success_message % dict(
-            cleaned_data,
-            name=self.object.user.username,
-            action=latest_log.get_action_display(),
-        )
-
 
 class EmployeeUpdateView(HtmxTemplateResponseMixin, UpdateView):
-    model = AuthenticatorEmployee
+    model = Employee
     template_name = "terminusgps_authenticator/employees/update.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_update.html"
-    queryset = AuthenticatorEmployee.objects.all()
+    queryset = Employee.objects.all()
     fields = ["user", "code"]
     context_object_name = "employee"
     http_method_names = ["get", "post"]
 
 
 class EmployeeDeleteView(HtmxTemplateResponseMixin, DeleteView):
-    model = AuthenticatorEmployee
+    model = Employee
     template_name = "terminusgps_authenticator/employees/delete.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_delete.html"
-    queryset = AuthenticatorEmployee.objects.all()
+    queryset = Employee.objects.all()
     context_object_name = "employee"
     http_method_names = ["get", "post"]
 
@@ -191,12 +182,12 @@ class EmployeeDeleteView(HtmxTemplateResponseMixin, DeleteView):
 class EmployeeSetFingerprintView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView
 ):
-    model = AuthenticatorEmployee
+    model = Employee
     template_name = "terminusgps_authenticator/employees/set_fingerprint.html"
     partial_template_name = (
         "terminusgps_authenticator/employees/partials/_set_fingerprint.html"
     )
-    queryset = AuthenticatorEmployee.objects.all()
+    queryset = Employee.objects.all()
     context_object_name = "employee"
     http_method_names = ["get", "post"]
     fields = ["code"]

@@ -15,17 +15,10 @@ from .employees import (
     EmployeeListView,
     EmployeeSetFingerprintView,
 )
-from .reports import (
-    ReportCreateView,
-    ReportDetailView,
-    ReportDeleteView,
-    ReportListView,
-)
-from .logs import (
-    LogArchiveIndexView,
-    LogArchiveYearView,
-    LogArchiveMonthView,
-    LogArchiveDayView,
-    EmployeeLogIndexView,
-    LogDetailView,
+from .shifts import (
+    ShiftArchiveIndexView,
+    ShiftYearArchiveView,
+    ShiftMonthArchiveView,
+    ShiftDayArchiveView,
+    ShiftWeekArchiveView,
 )

@@ -7,7 +7,7 @@ from django.core.validators import validate_email, validate_image_file_extension
 from django.forms import widgets
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_authenticator.models import AuthenticatorEmployee
+from terminusgps_authenticator.models import Employee
 from terminusgps_authenticator.validators import (
     validate_spreadsheet_file,
     validate_email_unique,
@@ -15,6 +15,19 @@ from terminusgps_authenticator.validators import (
 
 
 class SettingsForm(forms.Form): ...
+
+
+class ShiftFilterForm(forms.Form):
+    start_date = forms.DateField(
+        widget=forms.widgets.SelectDateWidget(
+            attrs={"class": "p-2 bg-white rounded border"}
+        )
+    )
+    end_date = forms.DateField(
+        widget=forms.widgets.SelectDateWidget(
+            attrs={"class": "p-2 bg-white rounded border"}
+        )
+    )
 
 
 class ReportCreateForm(forms.Form):
@@ -29,7 +42,7 @@ class ReportCreateForm(forms.Form):
         )
     )
     employees = forms.ModelMultipleChoiceField(
-        queryset=AuthenticatorEmployee.objects.all(),
+        queryset=Employee.objects.all(),
         widget=forms.widgets.CheckboxSelectMultiple(
             attrs={"class": "p-2 bg-white rounded border"}
         ),
