@@ -1,4 +1,6 @@
+from typing import Any
 from datetime import datetime
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from django.http import HttpResponseRedirect, HttpResponse
@@ -6,11 +8,11 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import DetailView, DeleteView, FormView, ListView
 
+from terminusgps_authenticator.forms import ReportCreateForm
 from terminusgps_authenticator.models import (
     AuthenticatorLogItem,
     AuthenticatorLogReport,
 )
-from terminusgps_authenticator.forms import ReportCreateForm
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 
 
@@ -63,8 +65,16 @@ class ReportDetailView(DetailView, HtmxTemplateResponseMixin):
     template_name = "terminusgps_authenticator/reports/detail.html"
     partial_template_name = "terminusgps_authenticator/reports/partials/_detail.html"
     model = AuthenticatorLogReport
-    http_method_names = ["get"]
+    http_method_names = ["get", "patch"]
     context_object_name = "report"
+    extra_context = {"title": "Report Details"}
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        start_date, end_date = self.get_object().date_range
+        context["start_date"] = start_date
+        context["end_date"] = end_date
+        return context
 
 
 class ReportDownloadView(DetailView, HtmxTemplateResponseMixin):

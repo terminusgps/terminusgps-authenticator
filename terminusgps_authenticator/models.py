@@ -1,10 +1,12 @@
+import math
+
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.db.models import QuerySet
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.utils.dateparse import parse_duration
 
 from encrypted_model_fields.fields import EncryptedCharField
 
@@ -134,6 +136,21 @@ class AuthenticatorEmployeeShift(models.Model):
             self.duration = self.end_datetime - self.start_datetime
         super().save(**kwargs)
 
+    def get_duration_display(self) -> str:
+        total_seconds: int = self.duration.total_seconds()
+        SECONDS_PER_HOUR: int = 3600
+        SECONDS_PER_MINUTE: int = 60
+
+        hours: float = total_seconds // SECONDS_PER_HOUR
+        remaining_seconds: float = total_seconds - (hours * SECONDS_PER_HOUR)
+        minutes: float = remaining_seconds // SECONDS_PER_MINUTE
+        seconds: float = remaining_seconds - (minutes * SECONDS_PER_MINUTE)
+        return (
+            f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+            if hours
+            else f"{int(minutes):02d}:{int(seconds):02d}"
+        )
+
 
 class AuthenticatorLogReport(models.Model):
     datetime = models.DateTimeField(default=timezone.now)
@@ -153,8 +170,7 @@ class AuthenticatorLogReport(models.Model):
         return f"Report #{self.pk}"
 
     def save(self, **kwargs) -> None:
-        """Generates employee shifts if :py:attr:`pk` exists."""
-        if self.pk and not self.shifts_generated:
+        if not AuthenticatorEmployeeShift.objects.filter(report=self).exists():
             self.generate_shifts()
         super().save(**kwargs)
 
@@ -162,22 +178,7 @@ class AuthenticatorLogReport(models.Model):
         """Returns a URL pointing to the report's detail view."""
         return reverse("detail report", kwargs={"pk": self.pk})
 
-    def get_unique_employees(
-        self,
-    ) -> QuerySet[AuthenticatorEmployee, AuthenticatorEmployee | None]:
-        """
-        Retrieves a queryset of employees for the report.
-
-        :raises AssertionError: If the report doesn't have logs.
-        :returns: A queryset of :py:obj:`~terminusgps_authenticator.models.AuthenticatorEmployee`s.
-        :rtype: :py:obj:`~django.db.models.QuerySet`
-
-        """
-        assert self.logs.exists(), "Report logs weren't set."
-        employee_ids = self.get_unique_employee_ids()
-        return AuthenticatorEmployee.objects.filter(pk__in=employee_ids)
-
-    def get_unique_employee_ids(self) -> list[int]:
+    def get_employee_ids(self) -> list[int]:
         """
         Retrieves a list of unique employee ids for the report.
 
@@ -195,13 +196,11 @@ class AuthenticatorLogReport(models.Model):
         Generates a pdf file for the report.
 
         :raises AssertionError: If the report doesn't have logs.
-        :raises AssertionError: If the report doesn't have shifts.
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
         """
         assert self.logs.exists(), "Report logs weren't set"
-        assert self.shifts_generated, "Employee shifts weren't generated."
         self.pdf = ""
 
     @transaction.atomic
@@ -219,7 +218,7 @@ class AuthenticatorLogReport(models.Model):
         actions: frozenset = frozenset([punch_in, punch_out])
         prev: AuthenticatorLogItem | None = None
 
-        for employee in self.get_unique_employees():
+        for employee in self.get_employees():
             employee_logs = self.logs.filter(employee=employee).order_by("datetime")
 
             for curr in employee_logs:
@@ -238,14 +237,32 @@ class AuthenticatorLogReport(models.Model):
                     prev: AuthenticatorLogItem | None = curr
 
     @property
-    def shifts_generated(self) -> bool:
-        """Whether or not the report has generated employee shifts."""
-        return AuthenticatorEmployeeShift.objects.filter(report=self).exists()
+    def date_range(self):
+        """
+        A tuple of the start and end dates for the report.
+
+        :type: :py:obj:`tuple`
+
+        """
+        assert self.logs.exists(), "Report logs weren't set."
+        sorted_logs = self.logs.filter().order_by("datetime")
+        return sorted_logs.first().datetime, sorted_logs.last().datetime
 
     @property
-    def shifts(
+    def employees(self) -> QuerySet[AuthenticatorEmployee, AuthenticatorEmployee]:
+        """
+        A queryset of employees for the report.
+
+        :type: :py:obj:`~django.db.models.QuerySet`
+
+        """
+        try:
+            return AuthenticatorEmployee.objects.filter(pk__in=self.get_employee_ids())
+        except AssertionError:
+            return AuthenticatorEmployee.objects.none()
+
+    def get_shifts(
         self,
-    ) -> QuerySet[AuthenticatorEmployeeShift, AuthenticatorEmployeeShift | None]:
-        """All :py:obj:`~terminusgps_authenticator.models.AuthenticatorEmployeeShift`s generated by the report."""
-        assert self.shifts_generated, "Employee shifts weren't generated."
+    ) -> QuerySet[AuthenticatorEmployeeShift, AuthenticatorEmployeeShift]:
+        """Returns a queryset of shifts for the report."""
         return AuthenticatorEmployeeShift.objects.filter(report=self)
