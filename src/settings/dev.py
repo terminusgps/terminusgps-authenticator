@@ -20,6 +20,7 @@ ALLOWED_HOSTS = []
 FIELD_ENCRYPTION_KEY = "A77vVn8KpLMjLMkEptaAV232jd-TPS0ahX51aPuT8pc="
 AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
 FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
+SILENCED_SYSTEM_CHECKS = ["staticfiles.W004"]
 
 # Application definition
 

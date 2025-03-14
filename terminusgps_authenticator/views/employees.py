@@ -5,7 +5,6 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db.models import Q, QuerySet
@@ -14,7 +13,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
 
-from terminusgps_authenticator.models import Employee
+from terminusgps_authenticator.models import Employee, EmployeeShift
 from terminusgps_authenticator.utils import generate_random_password
 from terminusgps_authenticator.views.mixins import HtmxTemplateResponseMixin
 from terminusgps_authenticator.forms import (
@@ -148,15 +147,33 @@ class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
     http_method_names = ["get", "patch"]
     extra_context = {"class": "flex flex-col gap-8", "title": "Employee Details"}
 
+    @staticmethod
+    def clean_status(value: str | None) -> bool | None:
+        if value is None:
+            return
+
+        status = value.lower()
+        status_map = {"true": True, "false": False}
+        return status_map.get(status, None)
+
+    def get_shifts(self, total: int = 5) -> QuerySet[EmployeeShift | EmployeeShift]:
+        e, o = self.get_object(), "-start_datetime"
+        return EmployeeShift.objects.filter(employee=e).order_by(o)[:total]
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["latest_shifts"] = self.get_shifts(5)
+        return context
+
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.headers.get("HX-Request"):
             return HttpResponse(status=403)
-        status = request.GET.get("status")
 
+        status = self.clean_status(request.GET.get("status"))
         if status is not None:
             employee = self.get_object()
-            employee.punched_in = True if status == "true" else False
-            employee.save()
+            employee.punch_card.punched_in = status
+            employee.punch_card.save()
         return self.get(request, *args, **kwargs)
 
 
@@ -165,7 +182,7 @@ class EmployeeUpdateView(HtmxTemplateResponseMixin, UpdateView):
     template_name = "terminusgps_authenticator/employees/update.html"
     partial_template_name = "terminusgps_authenticator/employees/partials/_update.html"
     queryset = Employee.objects.all()
-    fields = ["user", "code"]
+    fields = ["phone", "code", "pfp", "title"]
     context_object_name = "employee"
     http_method_names = ["get", "post"]
 

@@ -1,12 +1,16 @@
-<div id="info" class="w-full bg-gray-300 p-2 border-2 rounded border-gray-600">
-    <form action="{% url 'update employee' employee.id %}" method="post" hx-target="this">
-        {% csrf_token %}
-        {{ form }}
-        <input
-            class="w-full cursor-pointer rounded border border-gray-600 bg-blue-50 p-2 text-gray-700 hover:bg-blue-100 transition-colors duration-300 ease-in-out"
-            hx-trigger="click"
-            type="button"
-            value="Edit"
-        >
-    </form>
-</div>
+<form hx-post="{% url 'update employee' employee.pk %}" hx-include="*" hx-swap="outerHTML">
+    {% csrf_token %}
+    {{ form }}
+    <input
+        class="w-full cursor-pointer rounded border border-gray-600 bg-blue-50 p-2 text-gray-700 hover:bg-blue-100 transition-colors duration-300 ease-in-out"
+        hx-trigger="click"
+        type="submit"
+    >
+    <input
+        class="w-full cursor-pointer rounded border border-gray-600 bg-blue-50 p-2 text-gray-700 hover:bg-blue-100 transition-colors duration-300 ease-in-out"
+        hx-trigger="click"
+        hx-get="{% url 'detail employee' employee.pk %}"
+        type="button"
+        value="Cancel"
+    >
+</form>

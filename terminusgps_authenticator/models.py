@@ -39,6 +39,10 @@ class Employee(models.Model):
         """Returns a URL pointing to the employee's detail view."""
         return reverse("detail employee", kwargs={"pk": self.pk})
 
+    @property
+    def punched_in(self) -> bool:
+        return self.punch_card.punched_in
+
 
 class EmployeeShift(models.Model):
     employee = models.ForeignKey(
@@ -74,7 +78,7 @@ class EmployeePunchCard(models.Model):
     employee = models.OneToOneField(
         "terminusgps_authenticator.Employee",
         on_delete=models.CASCADE,
-        related_name="pcard",
+        related_name="punch_card",
     )
     """An employee."""
     punched_in = models.BooleanField(default=False)
@@ -103,3 +107,31 @@ class EmployeePunchCard(models.Model):
                 self.last_punch_in_time = timezone.now()
             self._prev_punch_state = self.punched_in
         super().save(**kwargs)
+
+
+class Report(models.Model):
+    start_date = models.DateField()
+    """Start of the report date range."""
+    end_date = models.DateField()
+    """End of the report date range."""
+    pdf = models.FileField(null=True, blank=True, default=None)
+    """A programatically generated pdf file of the report."""
+
+    class Meta:
+        verbose_name = "report"
+        verbose_name_plural = "reports"
+
+    def __str__(self) -> str:
+        return f"Report #{self.pk}"
+
+    def save(self, **kwargs) -> None:
+        if self.pk and not self.pdf:
+            # TODO: Create a pdf of the report for emails
+            self.pdf = None
+        super().save(**kwargs)
+
+    @property
+    def shifts(self) -> models.QuerySet[EmployeeShift | EmployeeShift]:
+        return EmployeeShift.objects.filter(
+            start_datetime__gte=self.start_date, end_datetime__lte=self.end_date
+        )

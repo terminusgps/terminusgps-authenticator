@@ -13,6 +13,15 @@ class EmployeeShiftAdmin(admin.ModelAdmin):
 @admin.register(EmployeePunchCard)
 class EmployeePunchCardAdmin(admin.ModelAdmin):
     list_display = ["employee", "punched_in"]
+    actions = ["punch_employees_in", "punch_employees_out"]
+
+    @admin.action(description="Punch selected employees in")
+    def punch_employees_in(self, request, queryset) -> None:
+        return
+
+    @admin.action(description="Punch selected employees in")
+    def punch_employees_out(self, request, queryset) -> None:
+        return
 
 
 @admin.register(Employee)

@@ -1,8 +1,0 @@
-{% extends "terminusgps_authenticator/layout.html" %}
-{% block content %}
-<form hx-trigger="input changed delay:150ms" hx-indicator="#filter-indicator">
-    {% csrf_token %}
-    {{ form }}
-</form>
-{% include "terminusgps_authenticator/shifts/archives/partials/_index.html" %}
-{% endblock content %}

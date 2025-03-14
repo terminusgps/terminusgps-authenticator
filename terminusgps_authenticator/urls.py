@@ -35,23 +35,6 @@ urlpatterns = [
         views.EmployeeSetFingerprintView.as_view(),
         name="set fingerprint",
     ),
-    path("shifts/", views.ShiftArchiveIndexView.as_view(), name="index shifts"),
-    path(
-        "shifts/<int:year>/", views.ShiftYearArchiveView.as_view(), name="year shifts"
-    ),
-    path(
-        "shifts/<int:year>/<str:month>/",
-        views.ShiftMonthArchiveView.as_view(),
-        name="month shifts",
-    ),
-    path(
-        "shifts/<int:year>/<str:month>/<int:day>/",
-        views.ShiftDayArchiveView.as_view(),
-        name="day shifts",
-    ),
-    path(
-        "shifts/<int:year>/<int:week>/",
-        views.ShiftWeekArchiveView.as_view(),
-        name="week shifts",
-    ),
+    path("reports/", views.ReportListView.as_view(), name="list reports"),
+    path("shifts/<int:pk>/", views.ShiftListView.as_view(), name="list shifts"),
 ]

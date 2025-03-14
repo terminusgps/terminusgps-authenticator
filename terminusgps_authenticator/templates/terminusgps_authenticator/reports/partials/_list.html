@@ -1,0 +1,9 @@
+<div class="{{ class }}" id="reports">
+    <form hx-get="{% url 'list reports' %}" hx-include="this" hx-trigger="input changed delay:150ms" hx-target="#reports" hx-swap="outerHTML">
+        {% csrf_token %}
+        {{ form.paginate_by }}
+        {{ form.start_date }}
+        {{ form.end_date }}
+    </form>
+    <div class=""></div>
+</div>

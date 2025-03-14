@@ -1,66 +1,34 @@
-from typing import Any
 from uuid import uuid4
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.core.validators import validate_email, validate_image_file_extension
 from django.forms import widgets
-from django.utils.translation import gettext_lazy as _
 
-from terminusgps_authenticator.models import Employee
 from terminusgps_authenticator.validators import (
     validate_spreadsheet_file,
     validate_email_unique,
 )
 
 
-class SettingsForm(forms.Form): ...
-
-
-class ShiftFilterForm(forms.Form):
+class ReportFilterForm(forms.Form):
+    paginate_by = forms.ChoiceField(
+        required=False,
+        initial=25,
+        choices=((25, "25"), (50, "50"), (100, "100")),
+        widget=widgets.Select(attrs={"class": "p-2 rounded border bg-white"}),
+    )
     start_date = forms.DateField(
-        widget=forms.widgets.SelectDateWidget(
-            attrs={"class": "p-2 bg-white rounded border"}
-        )
-    )
-    end_date = forms.DateField(
-        widget=forms.widgets.SelectDateWidget(
-            attrs={"class": "p-2 bg-white rounded border"}
-        )
-    )
-
-
-class ReportCreateForm(forms.Form):
-    start_date = forms.DateField(
-        widget=forms.widgets.DateInput(
-            attrs={"type": "date", "class": "p-2 bg-white rounded border"}
-        )
-    )
-    end_date = forms.DateField(
-        widget=forms.widgets.DateInput(
-            attrs={"type": "date", "class": "p-2 bg-white rounded border"}
-        )
-    )
-    employees = forms.ModelMultipleChoiceField(
-        queryset=Employee.objects.all(),
-        widget=forms.widgets.CheckboxSelectMultiple(
-            attrs={"class": "p-2 bg-white rounded border"}
+        required=False,
+        widget=widgets.DateInput(
+            attrs={"type": "date", "class": "p-2 rounded border bg-white"}
         ),
     )
-
-    def clean(self) -> dict[str, Any] | None:
-        cleaned_data: dict[str, Any] | None = super().clean()
-        if cleaned_data:
-            start_date = cleaned_data.get("start_date")
-            end_date = cleaned_data.get("end_date")
-            date_diff = end_date - start_date
-
-            if date_diff.days < 0:
-                raise ValidationError(
-                    _("Whoops! Invalid start/end date combination."), code="invalid"
-                )
-
-        return cleaned_data
+    end_date = forms.DateField(
+        required=False,
+        widget=widgets.DateInput(
+            attrs={"type": "date", "class": "p-2 rounded border bg-white"}
+        ),
+    )
 
 
 class EmployeeSearchForm(forms.Form):

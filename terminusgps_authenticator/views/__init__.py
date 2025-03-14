@@ -15,10 +15,5 @@ from .employees import (
     EmployeeListView,
     EmployeeSetFingerprintView,
 )
-from .shifts import (
-    ShiftArchiveIndexView,
-    ShiftYearArchiveView,
-    ShiftMonthArchiveView,
-    ShiftDayArchiveView,
-    ShiftWeekArchiveView,
-)
+from .reports import ReportListView
+from .shifts import ShiftListView
