@@ -1,0 +1,17 @@
+<form id="login-form" class="{{ class }}" action="" method="post">
+    {% csrf_token %}
+    <div class="flex flex-col gap-2">
+        <div class="peer-required:font-bold">
+            {{ form.username.label }}
+        </div>
+        {{ form.username }}
+        {{ form.username.errors }}
+    </div>
+    <div class="flex flex-col gap-2">
+        {{ form.password.label }}
+        {{ form.password }}
+        {{ form.password.errors }}
+    </div>
+    <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" type="submit" value="Login">
+    <input class="hidden" type="hidden" id="next" value="{{ next }}">
+</form>

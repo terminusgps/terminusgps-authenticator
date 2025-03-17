@@ -1,0 +1,61 @@
+<div class="{{ class }}" id="reports">
+    <form hx-get="{% url 'list reports' %}" hx-include="*" hx-trigger="input changed delay:150ms" hx-target="#reports" hx-swap="outerHTML">
+        {% csrf_token %}
+        <div class="flex gap-2 justify-evenly">
+            <div class="flex flex-col gap-2 w-full">
+                {{ form.start_date.label }}
+                {{ form.start_date }}
+                {{ form.start_date.errors }}
+            </div>
+            <div class="flex flex-col gap-2 w-full">
+                {{ form.end_date.label }}
+                {{ form.end_date }}
+                {{ form.end_date.errors }}
+            </div>
+        </div>
+    </form>
+    <div id="report-list" class="relative overflow-x-auto">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 border-2 border-terminus-red-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="p-4">
+                        #
+                    </th>
+                    <th scope="col" class="p-4">
+                        Start
+                    </th>
+                    <th scope="col" class="p-4">
+                        End
+                    </th>
+                    <th scope="col" class="p-4">
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in page_obj %}
+                <tr onclick='window.location="{{ report.get_absolute_url }}"' id="{{ employee.id }}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 hover:bg-red-50 cursor-pointer group transition-colors duration-300 ease-in-out">
+                        <td class="p-4">
+                            {{ report.pk }}
+                        </td>
+                        <td class="p-4">
+                            {{ report.start_date }}
+                        </td>
+                        <td class="p-4">
+                            {{ report.end_date }}
+                        </td>
+                        <td class="p-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 flex group-hover:hidden">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 hidden group-hover:flex">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="report-settings" class="">
+    </div>
+</div>

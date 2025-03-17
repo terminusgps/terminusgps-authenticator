@@ -700,7 +700,7 @@ wheels = [
 ]
 
 [[package]]
-name = "terminusgps-authenticator"
+name = "terminusgps-timekeeper"
 version = "1.0.0"
 source = { virtual = "." }
 dependencies = [

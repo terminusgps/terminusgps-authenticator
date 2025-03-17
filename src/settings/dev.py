@@ -16,10 +16,23 @@ SECRET_KEY = "django-insecure-ig%^xfx+y+bwo*6fs3wzgd&lteu9meb02_h#c=-)b$gi&bs5d*
 DEBUG = True
 
 ALLOWED_HOSTS = []
+ADMINS = [
+    ("Blake", "blake@terminusgps.com"),
+    ("Peter", "peter@terminusgps.com"),
+    ("Lili", "lili@terminusgps.com"),
+]
 
-FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
+FIELD_ENCRYPTION_KEY = "A77vVn8KpLMjLMkEptaAV232jd-TPS0ahX51aPuT8pc="
 AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
 FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
+SILENCED_SYSTEM_CHECKS = ["staticfiles.W004"]
+
+TIMEKEEPER_REPORT_EMAILERS = [
+    "terminusgps_timekeeper.emailers.DailyReportEmailer",
+    "terminusgps_timekeeper.emailers.WeeklyReportEmailer",
+    "terminusgps_timekeeper.emailers.MonthlyReportEmailer",
+    "terminusgps_timekeeper.emailers.YearlyReportEmailer",
+]
 
 # Application definition
 
@@ -32,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "encrypted_model_fields",
     "django_browser_reload",
-    "terminusgps_authenticator.apps.TerminusgpsAuthenticatorConfig",
+    "terminusgps_timekeeper.apps.TerminusgpsTimekeeperConfig",
 ]
 
 MIDDLEWARE = [
