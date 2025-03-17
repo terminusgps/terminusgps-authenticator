@@ -9,11 +9,9 @@ from .generic import (
 from .employees import (
     EmployeeCreateView,
     EmployeeDetailView,
-    EmployeeUpdateView,
-    EmployeeDeleteView,
     EmployeeBatchCreateView,
     EmployeeListView,
     EmployeeSetFingerprintView,
 )
-from .reports import ReportListView
+from .reports import ReportListView, ReportDetailView
 from .shifts import ShiftListView

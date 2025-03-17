@@ -11,12 +11,6 @@ from terminusgps_timekeeper.validators import (
 
 
 class ReportFilterForm(forms.Form):
-    paginate_by = forms.ChoiceField(
-        required=False,
-        initial=25,
-        choices=((25, "25"), (50, "50"), (100, "100")),
-        widget=widgets.Select(attrs={"class": "p-2 rounded border bg-white"}),
-    )
     start_date = forms.DateField(
         required=False,
         widget=widgets.DateInput(

@@ -11,7 +11,7 @@ from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView, FormView, ListView, UpdateView, DeleteView
+from django.views.generic import DetailView, FormView, ListView, UpdateView
 
 from terminusgps_timekeeper.models import Employee, EmployeeShift
 from terminusgps_timekeeper.utils import generate_random_password
@@ -177,25 +177,6 @@ class EmployeeDetailView(HtmxTemplateResponseMixin, DetailView):
             employee.punch_card.punched_in = status
             employee.punch_card.save()
         return self.get(request, *args, **kwargs)
-
-
-class EmployeeUpdateView(HtmxTemplateResponseMixin, UpdateView):
-    model = Employee
-    template_name = "terminusgps_timekeeper/employees/update.html"
-    partial_template_name = "terminusgps_timekeeper/employees/partials/_update.html"
-    queryset = Employee.objects.all()
-    fields = ["phone", "code", "pfp", "title"]
-    context_object_name = "employee"
-    http_method_names = ["get", "post"]
-
-
-class EmployeeDeleteView(HtmxTemplateResponseMixin, DeleteView):
-    model = Employee
-    template_name = "terminusgps_timekeeper/employees/delete.html"
-    partial_template_name = "terminusgps_timekeeper/employees/partials/_delete.html"
-    queryset = Employee.objects.all()
-    context_object_name = "employee"
-    http_method_names = ["get", "post"]
 
 
 class EmployeeSetFingerprintView(

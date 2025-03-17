@@ -1,0 +1,41 @@
+<div id="report-{{ report.pk }}" class="{{ class }}">
+    <div id="report-{{ report.pk }}-shifts" class="relative overflow-x-auto">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Employee
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Start
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        End
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Duration
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shift in report.shifts %}
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                    <td class="px-6 py-4 text-nowrap">
+                        <a href="{{ shift.employee.get_absolute_url }}" class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted">{{ shift.employee }}</a>
+                    </td>
+                    <td class="px-6 py-4 text-nowrap">
+                        {{ shift.start_datetime }}
+                    </td>
+                    <td class="px-6 py-4 text-nowrap">
+                        {{ shift.end_datetime }}
+                    </td>
+                    <th class="px-6 py-4">
+                        {{ shift.get_duration_display }}
+                    </th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<a hx-boost="true" href="{% url 'list reports' %}" class="-mt-4 w-full cursor-pointer rounded border border-terminus-black bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-100">Back</a>

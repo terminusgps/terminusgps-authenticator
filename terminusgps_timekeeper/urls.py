@@ -21,20 +21,11 @@ urlpatterns = [
         name="detail employee",
     ),
     path(
-        "employees/<int:pk>/update/",
-        views.EmployeeUpdateView.as_view(),
-        name="update employee",
-    ),
-    path(
-        "employees/<int:pk>/delete/",
-        views.EmployeeDeleteView.as_view(),
-        name="delete employee",
-    ),
-    path(
         "employees/<int:pk>/set-fingerprint/",
         views.EmployeeSetFingerprintView.as_view(),
         name="set fingerprint",
     ),
     path("reports/", views.ReportListView.as_view(), name="list reports"),
+    path("reports/<int:pk>/", views.ReportDetailView.as_view(), name="detail report"),
     path("shifts/<int:pk>/", views.ShiftListView.as_view(), name="list shifts"),
 ]

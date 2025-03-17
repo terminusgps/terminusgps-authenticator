@@ -1,12 +1,11 @@
-import io
+import datetime
+
 from django.contrib.auth import get_user_model
-from django.core.files import File
-from reportlab.platypus import Table
-from reportlab.pdfgen import canvas
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
+from django.utils.functional import cached_property
 from encrypted_model_fields.fields import EncryptedCharField
 
 from terminusgps_timekeeper.utils import display_duration
@@ -47,7 +46,7 @@ class Employee(models.Model):
     @property
     def punched_in(self) -> bool:
         """Whether or not the employee is currently punched in."""
-        return self.punch_card.punched_in
+        return self.punch_card.punched_in if hasattr(self, "punch_card") else False
 
 
 class EmployeeShift(models.Model):
@@ -130,9 +129,19 @@ class Report(models.Model):
     def __str__(self) -> str:
         return f"Report #{self.pk}"
 
-    @property
+    def get_absolute_url(self) -> str:
+        """Returns a URL pointing to the report's detail view."""
+        return reverse("detail report", kwargs={"pk": self.pk})
+
+    @cached_property
     def shifts(self) -> models.QuerySet[EmployeeShift | EmployeeShift]:
         """All shifts between :py:attr:`start_date` and :py:attr:`end_date`."""
-        return EmployeeShift.objects.filter(
-            start_datetime__gte=self.start_date, end_datetime__lte=self.end_date
+        lower_bound = datetime.datetime.combine(
+            self.start_date, datetime.time.min, tzinfo=timezone.get_current_timezone()
         )
+        upper_bound = datetime.datetime.combine(
+            self.end_date, datetime.time.max, tzinfo=timezone.get_current_timezone()
+        )
+        return EmployeeShift.objects.filter(
+            start_datetime__gte=lower_bound, end_datetime__lte=upper_bound
+        ).order_by("end_datetime")
