@@ -1,5 +1,5 @@
 [project]
-name = "terminusgps-authenticator"
+name = "terminusgps-timekeeper"
 version = "1.0.0"
 description = "Authenticator app for Terminus GPS"
 readme = "README.md"

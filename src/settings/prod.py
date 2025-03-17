@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "docs",
     "encrypted_model_fields",
-    "terminusgps_authenticator.apps.TerminusgpsAuthenticatorConfig",
+    "terminusgps_timekeeper.apps.TerminusgpsTimekeeperConfig",
 ]
 
 MIDDLEWARE = [

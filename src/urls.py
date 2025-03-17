@@ -23,7 +23,7 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("docs/", include("docs.urls")),
-    path("", include("terminusgps_authenticator.urls")),
+    path("", include("terminusgps_timekeeper.urls")),
 ]
 
 if settings.DEBUG:
