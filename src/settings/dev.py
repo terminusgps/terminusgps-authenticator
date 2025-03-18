@@ -16,6 +16,8 @@ SECRET_KEY = "django-insecure-ig%^xfx+y+bwo*6fs3wzgd&lteu9meb02_h#c=-)b$gi&bs5d*
 DEBUG = True
 
 DOCS_ROOT = BASE_DIR.parent / "docs" / "build" / "html"
+WIALON_TOKEN = os.getenv("WIALON_TOKEN")
+WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
 
 ALLOWED_HOSTS = []
 ADMINS = [

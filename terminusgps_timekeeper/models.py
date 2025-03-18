@@ -24,6 +24,10 @@ class Employee(models.Model):
     """An optional profile picture image file."""
     title = models.CharField(max_length=64, null=True, blank=True, default=None)
     """An optional employee title."""
+    driver_id = models.PositiveIntegerField(
+        verbose_name="wialon_driver_id", null=True, blank=True, default=None
+    )
+    """A Wialon driver id."""
 
     class Meta:
         verbose_name = "employee"

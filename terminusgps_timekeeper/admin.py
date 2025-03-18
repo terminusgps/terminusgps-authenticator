@@ -15,10 +15,10 @@ class ReportAdmin(admin.ModelAdmin):
     list_display = ["__str__", "start_date", "end_date", "pdf"]
     actions = ["generate_pdf_files"]
 
-    @admin.action(description="Generate pdf file for selected")
-    def regenerate_pdf_files(self, request, queryset) -> None:
+    @admin.action(description="Generate pdf file(s) for selected")
+    def generate_pdf_files(self, request, queryset) -> None:
         for report in queryset:
-            generate_report_pdf(report.id)
+            generate_report_pdf(report)
 
         self.message_user(
             request,

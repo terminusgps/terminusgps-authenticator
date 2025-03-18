@@ -279,7 +279,8 @@ class PDFReportGenerator:
         self.report.pdf.save(self.filename, self.buffer, save=True)
         return self.report
 
-    def _create_doc(self, buffer: io.BytesIO) -> platypus.SimpleDocTemplate:
+    @staticmethod
+    def _create_doc(buffer: io.BytesIO) -> platypus.SimpleDocTemplate:
         """
         Creates a :py:obj:`~reportlab.platypus.SimpleDocTemplate` for the report.
 
@@ -474,7 +475,7 @@ class PDFReportGenerator:
         plt.xlabel("Day of Week")
         plt.ylabel("Total Hours")
         plt.xticks(rotation=45)
-        plt.ylim(top=max([day_totals[day] for day in days]) * 1.2)
+        plt.ylim(top=30.0)
         plt.tight_layout()
         img_buffer = io.BytesIO()
         plt.savefig(img_buffer, format="png", bbox_inches="tight")
