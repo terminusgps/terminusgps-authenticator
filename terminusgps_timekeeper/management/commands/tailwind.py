@@ -55,18 +55,18 @@ class Command(BaseCommand):
 
         :returns: A command to be executed by :py:func:`os.system`.
         :rtype: :py:obj:`str`
+
         """
         input, output = self.get_input_filepath(), self.get_output_filepath()
-        command = f"npx @tailwindcss/cli -i {input} -o {output}"
         match subcommand:
             case "start":
                 styled = self.style.NOTICE
                 message = "Starting tailwind compiler..."
-                command += " --watch"
+                command = f"npx @tailwindcss/cli -i {input} -o {output} --watch"
             case "build":
                 styled = self.style.NOTICE
                 message = "Building tailwind for production..."
-                command += " --minify"
+                command = f"npx @tailwindcss/cli -i {input} -o {output} --minify"
             case "install":
                 if not self.node_package_installed("tailwindcss"):
                     styled = self.style.NOTICE
@@ -75,7 +75,7 @@ class Command(BaseCommand):
                 else:
                     styled = self.style.WARNING
                     message = "Tailwind is already installed, building for production instead..."
-                    command += "--minify"
+                    command = f"npx @tailwindcss/cli -i {input} -o {output} --minify"
             case _:
                 raise ValueError("Invalid subcommand '%(cmd)s'" % {"cmd": subcommand})
         self.stdout.write(styled(message))
@@ -91,13 +91,11 @@ class Command(BaseCommand):
         :rtype: :py:obj:`list`
 
         """
-        dependencies: list[str] = []
         if not os.path.isfile("package.json"):
-            return dependencies
+            return []
 
         with open("package.json", "r") as file:
-            dependencies.extend(json.load(file).get("devDependencies").keys())
-        return dependencies
+            return json.load(file).get("devDependencies").keys()
 
     def node_package_installed(self, name: str) -> bool:
         """
@@ -110,9 +108,9 @@ class Command(BaseCommand):
         return name in self.get_node_dependencies()
 
     def get_input_filepath(self) -> str:
-        """Returns the first input.css file found in ``BASE_DIR/css``."""
+        """Returns an input filepath for the tailwind compiler."""
         return "./src/static/src/css/input.css"
 
     def get_output_filepath(self) -> str:
-        """Returns the first output.css file found in ``BASE_DIR/css``."""
+        """Returns an output filepath for the tailwind compiler."""
         return "./src/static/src/css/output.css"
