@@ -1,6 +1,7 @@
 from django.contrib import admin, messages
 from django.utils.translation import ngettext
 
+from terminusgps_timekeeper.pdf_generators import generate_report_pdf
 from terminusgps_timekeeper.models import (
     Employee,
     EmployeePunchCard,
@@ -12,6 +13,23 @@ from terminusgps_timekeeper.models import (
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
     list_display = ["__str__", "start_date", "end_date", "pdf"]
+    actions = ["generate_pdf_files"]
+
+    @admin.action(description="Generate pdf file for selected")
+    def regenerate_pdf_files(self, request, queryset) -> None:
+        for report in queryset:
+            generate_report_pdf(report.id)
+
+        self.message_user(
+            request,
+            ngettext(
+                "%(count)s report pdf file was generated.",
+                "%(count)s report pdf files were generated.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.INFO,
+        )
 
 
 @admin.register(Employee)

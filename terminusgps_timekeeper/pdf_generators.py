@@ -1,27 +1,20 @@
-import io
-import pathlib
-import os
 import datetime
-import numpy as np
+import io
+import os
+import pathlib
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 from django.conf import settings
 from django.db.models import Sum
 from django.utils import timezone
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import ParagraphStyle, PropertySet, getSampleStyleSheet
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-from reportlab.platypus import (
-    PageBreak,
-    Paragraph,
-    SimpleDocTemplate,
-    Image,
-    Spacer,
-    TableStyle,
-    Table,
-)
 
+from reportlab import platypus
+from reportlab.lib import colors
+from reportlab.lib import pagesizes
+from reportlab.lib import styles
+from reportlab.lib import units
 from terminusgps_timekeeper.models import Employee, Report
 from terminusgps_timekeeper.utils import display_duration
 
@@ -30,20 +23,17 @@ class PDFReportGenerator:
     def __init__(self, report: Report) -> None:
         self.report = report
         self.filename = f"report_{report.pk}_{report.start_date}_{report.end_date}.pdf"
-        self.buffer = io.BytesIO()
-        self.doc = SimpleDocTemplate(
-            self.buffer,
-            pagesize=letter,
-            rightMargin=0.5 * inch,
-            leftMargin=0.5 * inch,
-            topMargin=0.5 * inch,
-            bottomMargin=0.5 * inch,
-        )
-        self.styles = getSampleStyleSheet()
+        self.styles = styles.getSampleStyleSheet()
         self.elements = []
 
+        self.buffer = io.BytesIO()
+        self.doc = self._create_doc(self.buffer)
+        self._add_doc_styles()
+
+    def _add_doc_styles(self) -> None:
+        """Updates :py:attr:`styles` with more styles."""
         self.styles.add(
-            ParagraphStyle(
+            styles.ParagraphStyle(
                 name="DocTitle",
                 parent=self.styles["Heading1"],
                 fontsize=24,
@@ -51,7 +41,7 @@ class PDFReportGenerator:
             )
         )
         self.styles.add(
-            ParagraphStyle(
+            styles.ParagraphStyle(
                 name="DocSubtitle",
                 parent=self.styles["Heading2"],
                 fontSize=16,
@@ -59,13 +49,24 @@ class PDFReportGenerator:
             )
         )
         self.styles.add(
-            ParagraphStyle(
+            styles.ParagraphStyle(
                 name="TableHeader",
                 parent=self.styles["Normal"],
                 fontSize=12,
                 alignment=1,
                 fontname="Helvetica-Bold",
             )
+        )
+
+    def _create_doc(self, buffer: io.BytesIO) -> platypus.SimpleDocTemplate:
+        """Creates a :py:obj:`~reportlab.platypus.SimpleDocTemplate` for the report."""
+        return platypus.SimpleDocTemplate(
+            buffer,
+            pagesize=pagesizes.letter,
+            rightMargin=0.5 * units.inch,
+            leftMargin=0.5 * units.inch,
+            topMargin=0.5 * units.inch,
+            bottomMargin=0.5 * units.inch,
         )
 
     @property
@@ -120,7 +121,7 @@ class PDFReportGenerator:
         }
 
     def add_spacer(
-        self, width: float = 1, height: float = 0.25, unit: float = inch
+        self, width: float = 1, height: float = 0.25, unit: float = units.inch
     ) -> None:
         """
         Adds a spacer to the document.
@@ -135,9 +136,9 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
-        self.elements.append(Spacer(width, height * unit))
+        self.elements.append(platypus.Spacer(width, height * unit))
 
-    def add_paragraph(self, text: str, style: PropertySet) -> None:
+    def add_paragraph(self, text: str, style: styles.PropertySet) -> None:
         """
         Adds a paragraph to the document.
 
@@ -149,7 +150,7 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
-        self.elements.append(Paragraph(text, style))
+        self.elements.append(platypus.Paragraph(text, style))
 
     def add_pagebreak(self) -> None:
         """
@@ -159,7 +160,7 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
-        self.elements.append(PageBreak())
+        self.elements.append(platypus.PageBreak())
 
     def add_image_file(
         self,
@@ -187,7 +188,7 @@ class PDFReportGenerator:
         if not filepath or not os.path.exists(filepath):
             raise ValueError(f"'{filepath}' was not found.")
 
-        image = Image(filepath, width=width, height=height)
+        image = platypus.Image(filepath, width=width, height=height)
         if halign is not None:
             image.hAlign = halign
         self.elements.append(image)
@@ -209,7 +210,7 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
-        image = Image(buffer, width=width, height=height)
+        image = platypus.Image(buffer, width=width, height=height)
         if halign is not None:
             image.hAlign = halign
         self.elements.append(image)
@@ -224,19 +225,25 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
-        table = Table(data)
+        available_width = self.doc.width
+        table = platypus.Table(
+            data, colWidths=[available_width / len(data[0])] * len(data[0])
+        )
         table.setStyle(
-            TableStyle(
+            platypus.TableStyle(
                 [
+                    ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
                     ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
                     ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-                    ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                    ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
                     ("ALIGN", (1, 1), (1, -1), "RIGHT"),
                     ("ALIGN", (2, 0), (2, -1), "RIGHT"),
-                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                    ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
-                    ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
                     ("GRID", (0, 0), (-1, 0), 1, colors.black),
+                    ("BOX", (0, 0), (-1, -1), 1, colors.black),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.lightgrey),
+                    ("WIDTH", (0, 0), (-1, -1), available_width),
                 ]
             )
         )
@@ -244,7 +251,7 @@ class PDFReportGenerator:
 
     def _add_cover_page(self) -> None:
         # self.add_image_file(
-        #     self.logo_path, width=2 * inch, height=2 * inch, halign="CENTER"
+        #     self.logo_path, width=2 * units.inch, height=2 * units.inch, halign="CENTER"
         # )
         self.add_spacer(1, 1)
         self.add_paragraph("Terminus GPS Timekeeper", self.styles["DocTitle"])
@@ -252,8 +259,11 @@ class PDFReportGenerator:
         self.add_paragraph(self.report_type, self.styles["DocSubtitle"])
         self.add_spacer(1, 0.25)
         self.add_paragraph(self.report_period, self.styles["DocSubtitle"])
-        self.add_spacer(1, 2)
-        self.add_paragraph(f"Generated on: {timezone.now()}", self.styles["Normal"])
+        self.add_spacer(1, 6)
+        self.add_paragraph(
+            f"Generated on: {timezone.now():%Y-%m-%d %H:%M:%S:%f}",
+            self.styles["Normal"],
+        )
         self.add_pagebreak()
 
     def _add_overview_page(self) -> None:
@@ -283,7 +293,7 @@ class PDFReportGenerator:
         img_buffer.seek(0)
         plt.close()
 
-        self.add_image_buffer(img_buffer, width=7 * inch, height=4 * inch)
+        self.add_image_buffer(img_buffer, width=7 * units.inch, height=4 * units.inch)
         self.add_spacer(1, 0.5)
         self.add_paragraph("Hours Summary", self.styles["Heading2"])
         self.add_spacer(1, 0.25)
@@ -313,6 +323,8 @@ class PDFReportGenerator:
             employee_shifts = self.report.shifts.filter(employee=employee)
             self.add_paragraph(f"Shift Report: {employee}", self.styles["Heading2"])
             self.add_spacer(1, 0.25)
+            self._add_employee_weekly_pattern_chart(employee)
+            self.add_spacer(1, 0.25)
             data = [["Start Date/Time", "End Date/Time", "Duration"]]
             total_duration = datetime.timedelta(0)
 
@@ -329,6 +341,56 @@ class PDFReportGenerator:
 
             if employee != employees.last():
                 self.add_pagebreak()
+
+    def _add_employee_weekly_pattern_chart(self, employee: Employee) -> None:
+        shifts = self.report.shifts.filter(employee=employee)
+        if not shifts.exists():
+            self.add_paragraph(
+                f"No shift data available for {employee} in this period.",
+                self.styles["Normal"],
+            )
+            return
+
+        days = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
+        day_totals = {day: 0 for day in days}
+
+        for shift in shifts:
+            day_name = shift.start_datetime.strftime("%A")
+            hours = shift.duration.total_seconds() / 3600
+            day_totals[day_name] += hours
+
+        plt.figure(figsize=(8, 4))
+        bars = plt.bar(days, [day_totals[day] for day in days], color="skyblue")
+        for bar in bars:
+            height = bar.get_height()
+            if height > 0:
+                plt.text(
+                    bar.get_x() + bar.get_width() / 2.0,
+                    height + 0.1,
+                    f"{height:.1f}h",
+                    ha="center",
+                    va="bottom",
+                )
+        plt.title(f"Hours Worked by Day of Week: {employee}")
+        plt.xlabel("Day of Week")
+        plt.ylabel("Total Hours")
+        plt.xticks(rotation=45)
+        plt.ylim(top=max([day_totals[day] for day in days]) * 1.2)
+        plt.tight_layout()
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format="png", bbox_inches="tight")
+        img_buffer.seek(0)
+        plt.close()
+
+        self.add_image_buffer(img_buffer, width=7 * units.inch, height=4 * units.inch)
 
     def generate(self) -> Report:
         self._add_cover_page()
