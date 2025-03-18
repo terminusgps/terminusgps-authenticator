@@ -12,7 +12,7 @@ DEBUG = False
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "")
-AUTHENTICATOR_REPO_URL = "https://github.com/terminusgps/terminusgps-authenticator/"
+TIMEKEEPER_REPO_URL = "https://github.com/terminusgps/terminusgps-timekeeper/"
 FILE_UPLOAD_PERMISSIONS = stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP
 
 # Application definition

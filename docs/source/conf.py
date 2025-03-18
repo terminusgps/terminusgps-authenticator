@@ -11,7 +11,7 @@ import django
 from sphinxawesome_theme.postprocess import Icons
 
 sys.path.insert(0, os.path.abspath("../.."))
-os.environ["DJANGO_SETTINGS_MODULE"] = "src.settings"
+os.environ["DJANGO_SETTINGS_MODULE"] = "src.settings.dev"
 django.setup()
 
 project = "terminusgps-authenticator"

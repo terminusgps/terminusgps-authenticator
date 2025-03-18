@@ -6,7 +6,6 @@ import pathlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-from django.conf import settings
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -19,19 +18,41 @@ from terminusgps_timekeeper.models import Employee, Report
 from terminusgps_timekeeper.utils import display_duration
 
 
+def generate_report_pdf(report: Report) -> Report:
+    """
+    Generates a pdf file for the provided report and saves it.
+
+    :param report: A report.
+    :type report: :py:obj:`~terminusgps_timekeeper.models.Report`
+    :returns: The report, with a pdf file generated and saved for it.
+    :rtype: :py:obj:`~terminusgps_timekeeper.models.Report`
+
+    """
+    return PDFReportGenerator(report).generate()
+
+
 class PDFReportGenerator:
+    """A generator class for report pdf files."""
+
     def __init__(self, report: Report) -> None:
-        self.report = report
-        self.filename = f"report_{report.pk}_{report.start_date}_{report.end_date}.pdf"
-        self.styles = styles.getSampleStyleSheet()
+        """
+        Generates basic styles, sets :py:attr:`elements` to any empty list, sets :py:attr:`report` to the provided report and generates a filename for the pdf file.
+
+        :param report: A report.
+        :type report: :py:obj:`~terminusgps_timekeeper.models.Report`
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
         self.elements = []
+        self.report: Report = report
+        self.styles: styles.StyleSheet1 = styles.getSampleStyleSheet()
+        self.filename: str = (
+            f"report_{report.pk}_{report.start_date}_{report.end_date}.pdf"
+        )
 
         self.buffer = io.BytesIO()
         self.doc = self._create_doc(self.buffer)
-        self._add_doc_styles()
-
-    def _add_doc_styles(self) -> None:
-        """Updates :py:attr:`styles` with more styles."""
         self.styles.add(
             styles.ParagraphStyle(
                 name="DocTitle",
@@ -58,44 +79,34 @@ class PDFReportGenerator:
             )
         )
 
-    def _create_doc(self, buffer: io.BytesIO) -> platypus.SimpleDocTemplate:
-        """Creates a :py:obj:`~reportlab.platypus.SimpleDocTemplate` for the report."""
-        return platypus.SimpleDocTemplate(
-            buffer,
-            pagesize=pagesizes.letter,
-            rightMargin=0.5 * units.inch,
-            leftMargin=0.5 * units.inch,
-            topMargin=0.5 * units.inch,
-            bottomMargin=0.5 * units.inch,
-        )
-
-    @property
-    def logo_path(self) -> pathlib.Path | None:
-        logo_path = os.path.join(
-            settings.BASE_DIR
-            / "terminusgps_timekeeper"
-            / "static"
-            / "terminusgps_timekeeper"
-            / "logo.svg"
-        )
-        if not os.path.exists(logo_path):
-            return
-        return logo_path
-
     @property
     def report_period(self) -> str:
+        """Shortcut property for :py:meth:`get_report_period`"""
         return self.get_report_period()
 
     @property
     def report_type(self) -> str:
+        """Shortcut property for :py:meth:`get_report_type`"""
         return self.get_report_type()
 
     def get_report_period(self) -> str:
-        """Returns a subtitle based on the report's period."""
+        """
+        Returns a subtitle based on the report's period.
+
+        :returns: A report period.
+        :rtype: :py:obj:`str`
+
+        """
         return f"Report period: {self.report.start_date} to {self.report.end_date}"
 
     def get_report_type(self) -> str:
-        """Returns a title based on the report's period."""
+        """
+        Returns a report type string based on the report time period.
+
+        :returns: A report type.
+        :rtype: :py:obj:`str`
+
+        """
         match (self.report.end_date - self.report.start_date).days:
             case 0 | 1:
                 return "Daily Report"
@@ -107,6 +118,13 @@ class PDFReportGenerator:
                 return "Yearly Report"
 
     def get_employee_hours(self) -> dict:
+        """
+        Returns a dictionary containing all employees and their aggregate hours in the report period.
+
+        :returns: A dictionary of employees and work hours.
+        :rtype: :py:obj:`dict`
+
+        """
         return {
             str(employee): (
                 self.report.shifts.filter(employee=employee).aggregate(
@@ -188,10 +206,8 @@ class PDFReportGenerator:
         if not filepath or not os.path.exists(filepath):
             raise ValueError(f"'{filepath}' was not found.")
 
-        image = platypus.Image(filepath, width=width, height=height)
-        if halign is not None:
-            image.hAlign = halign
-        self.elements.append(image)
+        image: platypus.Image = platypus.Image(filepath, width=width, height=height)
+        self._add_image(image, halign)
 
     def add_image_buffer(
         self, buffer: io.BytesIO, width: float, height: float, halign: str | None = None
@@ -199,21 +215,18 @@ class PDFReportGenerator:
         """
         Adds an image buffer to the document.
 
-        :param path: An image filepath.
-        :type path: :py:obj:`~pathlib.Path`
+        :param buffer: A binary data stream.
+        :type buffer: :py:obj:`~io.BytesIO`
         :param width: Width for the image.
         :type width: :py:obj:`float`
         :param height: Height for the image.
         :type height: :py:obj:`float`
-        :raises ValueError: If the image file does not exist.
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
         """
-        image = platypus.Image(buffer, width=width, height=height)
-        if halign is not None:
-            image.hAlign = halign
-        self.elements.append(image)
+        image: platypus.Image = platypus.Image(buffer, width=width, height=height)
+        self._add_image(image, halign)
 
     def add_table(self, data: list[list[str]]) -> None:
         """
@@ -225,10 +238,10 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
-        available_width = self.doc.width
-        table = platypus.Table(
-            data, colWidths=[available_width / len(data[0])] * len(data[0])
-        )
+        available_width: float = self.doc.width
+        colwidths: list[float] = [available_width / len(data[0])] * len(data[0])
+        table: platypus.Table = platypus.Table(data, colWidths=colwidths)
+
         table.setStyle(
             platypus.TableStyle(
                 [
@@ -249,11 +262,66 @@ class PDFReportGenerator:
         )
         self.elements.append(table)
 
+    def generate(self) -> Report:
+        """
+        Generates a PDF file based on :py:attr:`report` and saves it.
+
+        :returns: The report.
+        :rtype: :py:obj:`~terminusgps_timekeeper.models.Report`
+
+        """
+        self._add_cover_page()
+        self._add_overview_page()
+        self._add_employee_shift_tables()
+
+        self.doc.build(self.elements)
+        self.buffer.seek(0)
+        self.report.pdf.save(self.filename, self.buffer, save=True)
+        return self.report
+
+    def _create_doc(self, buffer: io.BytesIO) -> platypus.SimpleDocTemplate:
+        """
+        Creates a :py:obj:`~reportlab.platypus.SimpleDocTemplate` for the report.
+
+        :param buffer: A binary data stream.
+        :type buffer: :py:obj:`~io.BytesIO`
+        :returns: A simple doc template for the report pdf file.
+        :rtype: :py:obj:`~reportlab.platypus.SimpleDocTemplate`
+
+        """
+        return platypus.SimpleDocTemplate(
+            buffer,
+            pagesize=pagesizes.letter,
+            rightMargin=0.5 * units.inch,
+            leftMargin=0.5 * units.inch,
+            topMargin=0.5 * units.inch,
+            bottomMargin=0.5 * units.inch,
+        )
+
+    def _add_image(self, image: platypus.Image, halign: str | None) -> None:
+        """
+        Adds an image to the document.
+
+        :param image: An image.
+        :type image: :py:obj:`~reportlab.platypus.Image`
+        :param halign: Horizontal alignment for the image.
+        :type halign: :py:obj:`str` | :py:obj:`None`
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        if halign is not None:
+            image.hAlign = halign
+        self.elements.append(image)
+
     def _add_cover_page(self) -> None:
-        # self.add_image_file(
-        #     self.logo_path, width=2 * units.inch, height=2 * units.inch, halign="CENTER"
-        # )
-        self.add_spacer(1, 1)
+        """
+        Adds a cover page to the document.
+
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
         self.add_paragraph("Terminus GPS Timekeeper", self.styles["DocTitle"])
         self.add_spacer(1, 0.25)
         self.add_paragraph(self.report_type, self.styles["DocSubtitle"])
@@ -267,6 +335,13 @@ class PDFReportGenerator:
         self.add_pagebreak()
 
     def _add_overview_page(self) -> None:
+        """
+        Adds an overview page to the document.
+
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
         self.add_paragraph("Employee Hours", self.styles["Heading1"])
         self.add_spacer(1, 0.5)
         if not self.report.shifts.exists():
@@ -311,6 +386,13 @@ class PDFReportGenerator:
         self.add_pagebreak()
 
     def _add_employee_shift_tables(self) -> None:
+        """
+        Adds an employee shift table to the document.
+
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
         if not self.report.shifts.exists():
             return
 
@@ -343,6 +425,15 @@ class PDFReportGenerator:
                 self.add_pagebreak()
 
     def _add_employee_weekly_pattern_chart(self, employee: Employee) -> None:
+        """
+        Adds an employee weekly shift pattern chart to the document.
+
+        :param employee: An employee.
+        :type employee: :py:obj:`~terminusgps_timekeeper.models.Employee`
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
         shifts = self.report.shifts.filter(employee=employee)
         if not shifts.exists():
             self.add_paragraph(
@@ -391,22 +482,3 @@ class PDFReportGenerator:
         plt.close()
 
         self.add_image_buffer(img_buffer, width=7 * units.inch, height=4 * units.inch)
-
-    def generate(self) -> Report:
-        self._add_cover_page()
-        self._add_overview_page()
-        self._add_employee_shift_tables()
-
-        self.doc.build(self.elements)
-        self.buffer.seek(0)
-        self.report.pdf.save(self.filename, self.buffer, save=True)
-        return self.report
-
-
-def generate_report_pdf(report_id: int) -> Report | None:
-    try:
-        report = Report.objects.get(pk=report_id)
-        generator = PDFReportGenerator(report)
-        return generator.generate()
-    except Report.DoesNotExist:
-        return

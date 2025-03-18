@@ -68,14 +68,17 @@ class EmployeeShift(models.Model):
         verbose_name_plural = "shifts"
 
     def __str__(self) -> str:
+        """Returns ``"<EMPLOYEE_EMAIL> shift #<SHIFT_ID>"``."""
         return f"{self.employee} shift #{self.pk}"
 
     def save(self, **kwargs) -> None:
+        """Sets the shift duration, if it wasn't already set."""
         if not self.duration:
             self.duration = self.end_datetime - self.start_datetime
         super().save(**kwargs)
 
     def get_duration_display(self) -> str:
+        """Returns a human-readable string representation of the shift duration."""
         return display_duration(self.duration.total_seconds())
 
 
@@ -98,9 +101,11 @@ class EmployeePunchCard(models.Model):
         verbose_name_plural = "punch cards"
 
     def __str__(self) -> str:
+        """Returns ``"<EMPLOYEE_EMAIL_ADDRESS>'s Punch Card"``"""
         return f"{self.employee.user.username}'s Punch Card"
 
     def save(self, **kwargs) -> None:
+        """Generates a shift for the employee if the employee is now punched out."""
         if self.pk and self._prev_punch_state != self.punched_in:
             if self._prev_punch_state is True and self.punched_in is False:
                 EmployeeShift.objects.create(
@@ -127,6 +132,7 @@ class Report(models.Model):
         verbose_name_plural = "reports"
 
     def __str__(self) -> str:
+        """Returns ``"Report #<REPORT_ID>"``."""
         return f"Report #{self.pk}"
 
     def get_absolute_url(self) -> str:

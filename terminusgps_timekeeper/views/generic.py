@@ -6,8 +6,8 @@ from django.views.generic import RedirectView, TemplateView
 
 from terminusgps_timekeeper.views.mixins import HtmxTemplateResponseMixin
 
-if not hasattr(settings, "AUTHENTICATOR_REPO_URL"):
-    raise ImproperlyConfigured("'AUTHENTICATOR_REPO_URL' setting is required.")
+if not hasattr(settings, "TIMEKEEPER_REPO_URL"):
+    raise ImproperlyConfigured("'TIMEKEEPER_REPO_URL' setting is required.")
 
 
 class DashboardView(LoginRequiredMixin, RedirectView):
@@ -49,4 +49,4 @@ class PrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
 class SourceCodeView(RedirectView):
     http_method_names = ["get"]
     permanent = True
-    url = settings.AUTHENTICATOR_REPO_URL
+    url = settings.TIMEKEEPER_REPO_URL
