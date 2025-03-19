@@ -3,13 +3,17 @@
     <div id="latest-reports" class="flex flex-col gap-4 rounded border bg-white p-4 drop-shadow-md">
         <div class="flex justify-between gap-2">
             <h2 class="text-lg font-bold">Latest reports</h2>
-            <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'list reports' %}">View all</a>
+            <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'archive reports' %}">View all</a>
         </div>
         <div class="grid grid-rows-5 gap-4 md:grid-cols-5 md:grid-rows-1">
             {% for report in latest %}
-            <div class="overflow-clip rounded border bg-gray-100 p-4 drop-shadow-sm">
-                <h3 class="text-sm text-nowrap text-gray-700">{{ report.pk }}</h3>
-                <p class="text-gray-800">{{ report.user }}</p>
+            <div class="overflow-clip rounded border bg-gray-300 p-4 drop-shadow-lg">
+                <p class="text-sm">{{ report.start_date }}</p>
+                <p class="text-sm">{{ report.end_date }}</p>
+                <div class="flex flex-col gap-2 mt-2">
+                    <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'detail report' report.pk %}">Inspect Report</a>
+                    <a class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" href="{% url 'download report' report.pk %}">Download</a>
+                </div>
             </div>
             {% endfor %}
         </div>

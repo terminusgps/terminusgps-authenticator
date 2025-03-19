@@ -21,7 +21,7 @@ from terminusgps_timekeeper.utils import display_duration
 matplotlib.use("agg")  # Forces matplotlib to run non-interactively
 
 
-def generate_report_pdf(report: Report, author: str | None = None) -> Report:
+def generate_report_pdf(report: Report, author: str | None = None) -> io.BytesIO:
     """
     Generates a pdf file for the provided report and saves it.
 
@@ -272,12 +272,12 @@ class PDFReportGenerator:
         )
         self.elements.append(table)
 
-    def generate(self) -> Report:
+    def generate(self) -> io.BytesIO:
         """
-        Generates a PDF file based on :py:attr:`report` and saves it.
+        Generates a PDF file based on :py:attr:`report` and returns it.
 
-        :returns: The report.
-        :rtype: :py:obj:`~terminusgps_timekeeper.models.Report`
+        :returns: A PDF file data stream.
+        :rtype: :py:obj:`~io.BytesIO`
 
         """
         self._add_cover_page()
@@ -286,8 +286,7 @@ class PDFReportGenerator:
 
         self.doc.build(self.elements)
         self.buffer.seek(0)
-        self.report.pdf.save(self.filename, self.buffer, save=True)
-        return self.report
+        return self.buffer
 
     @staticmethod
     def _create_doc(buffer: io.BytesIO) -> platypus.SimpleDocTemplate:

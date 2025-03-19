@@ -1,11 +1,5 @@
 from .auth import LoginView, LogoutView
-from .generic import (
-    DashboardView,
-    SettingsView,
-    ContactView,
-    PrivacyPolicyView,
-    SourceCodeView,
-)
+from .generic import ContactView, PrivacyPolicyView, SourceCodeView
 from .employees import (
     EmployeeCreateView,
     EmployeeDetailView,
@@ -19,5 +13,8 @@ from .reports import (
     ReportCreateView,
     ReportCreateSuccessView,
     ReportDownloadView,
+    ReportArchiveView,
+    ReportDeleteView,
+    report_download_view,
 )
 from .shifts import ShiftListView

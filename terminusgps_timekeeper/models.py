@@ -128,8 +128,6 @@ class Report(models.Model):
     """Start of the report date range."""
     end_date = models.DateField()
     """End of the report date range."""
-    pdf = models.FileField(null=True, blank=True, default=None)
-    """A programatically generated pdf file of the report."""
 
     class Meta:
         verbose_name = "report"
@@ -142,6 +140,11 @@ class Report(models.Model):
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the report's detail view."""
         return reverse("detail report", kwargs={"pk": self.pk})
+
+    @cached_property
+    def employees(self) -> models.QuerySet[Employee | Employee]:
+        """All unique employees present in the report."""
+        return Employee.objects.filter(shifts__in=self.shifts).distinct()
 
     @cached_property
     def shifts(self) -> models.QuerySet[EmployeeShift | EmployeeShift]:
