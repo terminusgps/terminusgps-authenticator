@@ -4,10 +4,25 @@ from django import forms
 from django.core.validators import validate_email, validate_image_file_extension
 from django.forms import widgets
 
+from terminusgps_timekeeper.models import Report
 from terminusgps_timekeeper.validators import (
     validate_spreadsheet_file,
     validate_email_unique,
 )
+
+
+class ReportCreateForm(forms.ModelForm):
+    class Meta:
+        model = Report
+        fields = ("start_date", "end_date")
+        widgets = {
+            "start_date": widgets.DateInput(
+                attrs={"type": "date", "class": "p-2 rounded border bg-white"}
+            ),
+            "end_date": widgets.DateInput(
+                attrs={"type": "date", "class": "p-2 rounded border bg-white"}
+            ),
+        }
 
 
 class ReportFilterForm(forms.Form):

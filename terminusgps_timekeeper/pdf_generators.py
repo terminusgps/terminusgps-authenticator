@@ -3,9 +3,10 @@ import io
 import os
 import pathlib
 
+import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
 
+from django.conf import settings
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -17,8 +18,10 @@ from reportlab.lib import units
 from terminusgps_timekeeper.models import Employee, Report
 from terminusgps_timekeeper.utils import display_duration
 
+matplotlib.use("agg")  # Forces matplotlib to run non-interactively
 
-def generate_report_pdf(report: Report) -> Report:
+
+def generate_report_pdf(report: Report, author: str | None = None) -> Report:
     """
     Generates a pdf file for the provided report and saves it.
 
@@ -28,13 +31,13 @@ def generate_report_pdf(report: Report) -> Report:
     :rtype: :py:obj:`~terminusgps_timekeeper.models.Report`
 
     """
-    return PDFReportGenerator(report).generate()
+    return PDFReportGenerator(report, author).generate()
 
 
 class PDFReportGenerator:
     """A generator class for report pdf files."""
 
-    def __init__(self, report: Report) -> None:
+    def __init__(self, report: Report, author: str | None = None) -> None:
         """
         Generates basic styles, sets :py:attr:`elements` to any empty list, sets :py:attr:`report` to the provided report and generates a filename for the pdf file.
 
@@ -44,15 +47,17 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
-        self.elements = []
-        self.report: Report = report
-        self.styles: styles.StyleSheet1 = styles.getSampleStyleSheet()
         self.filename: str = (
             f"report_{report.pk}_{report.start_date}_{report.end_date}.pdf"
         )
 
-        self.buffer = io.BytesIO()
-        self.doc = self._create_doc(self.buffer)
+        self.elements: list = []
+        self.report: Report = report
+        self.styles: styles.StyleSheet1 = styles.getSampleStyleSheet()
+        self.buffer: io.BytesIO = io.BytesIO()
+        self.doc: platypus.SimpleDocTemplate = self._create_doc(self.buffer)
+
+        self.doc.author = author
         self.styles.add(
             styles.ParagraphStyle(
                 name="DocTitle",
@@ -78,6 +83,11 @@ class PDFReportGenerator:
                 fontname="Helvetica-Bold",
             )
         )
+
+    @property
+    def terminus_logo_path(self) -> pathlib.Path:
+        """Returns a path to the Terminus GPS logo."""
+        return settings.BASE_DIR / "static" / "src" / "img" / "logo.png"
 
     @property
     def report_period(self) -> str:
@@ -323,12 +333,19 @@ class PDFReportGenerator:
         :rtype: :py:obj:`None`
 
         """
+        self.add_spacer(1, 2)
         self.add_paragraph("Terminus GPS Timekeeper", self.styles["DocTitle"])
         self.add_spacer(1, 0.25)
         self.add_paragraph(self.report_type, self.styles["DocSubtitle"])
         self.add_spacer(1, 0.25)
         self.add_paragraph(self.report_period, self.styles["DocSubtitle"])
-        self.add_spacer(1, 6)
+        self.add_spacer(1, 4)
+        self.add_image_file(
+            self.terminus_logo_path,
+            width=2 * units.inch,
+            height=1 * units.inch,
+            halign="LEFT",
+        )
         self.add_paragraph(
             f"Generated on: {timezone.now():%Y-%m-%d %H:%M:%S:%f}",
             self.styles["Normal"],
@@ -353,23 +370,11 @@ class PDFReportGenerator:
             return
 
         employee_hours = self.get_employee_hours()
-        plt.figure(figsize=(8, 4))
         employees = list(employee_hours.keys())
         hours = list(employee_hours.values())
         sorted_data = sorted(zip(employees, hours), key=lambda x: x[1], reverse=True)
         employees = [item[0] for item in sorted_data]
         hours_list = [item[1] for item in sorted_data]
-        y_pos = np.arange(len(employees))
-        plt.barh(y_pos, hours_list, align="center")
-        plt.yticks(y_pos, employees)
-        plt.xlabel("Hours")
-        plt.title("Total hours by employee")
-        img_buffer = io.BytesIO()
-        plt.savefig(img_buffer, format="png", bbox_inches="tight")
-        img_buffer.seek(0)
-        plt.close()
-
-        self.add_image_buffer(img_buffer, width=7 * units.inch, height=4 * units.inch)
         self.add_spacer(1, 0.5)
         self.add_paragraph("Hours Summary", self.styles["Heading2"])
         self.add_spacer(1, 0.25)

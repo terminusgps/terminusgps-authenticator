@@ -26,6 +26,17 @@ urlpatterns = [
         name="set fingerprint",
     ),
     path("reports/", views.ReportListView.as_view(), name="list reports"),
+    path("reports/new/", views.ReportCreateView.as_view(), name="create report"),
+    path(
+        "reports/success/",
+        views.ReportCreateSuccessView.as_view(),
+        name="create report success",
+    ),
+    path(
+        "reports/<int:pk>/download/",
+        views.ReportDownloadView.as_view(),
+        name="download report",
+    ),
     path("reports/<int:pk>/", views.ReportDetailView.as_view(), name="detail report"),
     path("shifts/<int:pk>/", views.ShiftListView.as_view(), name="list shifts"),
 ]

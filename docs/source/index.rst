@@ -18,3 +18,4 @@ documentation for details.
     commands.rst
     models.rst
     pdf_files.rst
+    settings.rst

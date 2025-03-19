@@ -18,7 +18,7 @@ class ReportAdmin(admin.ModelAdmin):
     @admin.action(description="Generate pdf file(s) for selected")
     def generate_pdf_files(self, request, queryset) -> None:
         for report in queryset:
-            generate_report_pdf(report)
+            generate_report_pdf(report, __name__)
 
         self.message_user(
             request,

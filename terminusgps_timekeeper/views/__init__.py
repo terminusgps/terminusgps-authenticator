@@ -13,5 +13,11 @@ from .employees import (
     EmployeeListView,
     EmployeeSetFingerprintView,
 )
-from .reports import ReportListView, ReportDetailView
+from .reports import (
+    ReportListView,
+    ReportDetailView,
+    ReportCreateView,
+    ReportCreateSuccessView,
+    ReportDownloadView,
+)
 from .shifts import ShiftListView
